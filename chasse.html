@@ -270,7 +270,7 @@ var STEPS=[
   f:"Il giardino è ispirato alla foresta mitica di Himmapan.",
   place:'Lalitta Café',about:"Un caffè-giardino con cascate, ponti di pietra e sculture ovunque. Colazione in mezzo all'acqua.",
   mission:'Voi due davanti a una cascata.',maps:'https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai'},
- {id:'patueng',day:1,when:'Giovedì 15 · 11:45',x:247,y:390,lx:-30,ly:7,anc:'end',short:'Pa Tueng',
+ {id:'patueng',day:1,when:'Giovedì 15 · 11:45',x:247,y:390,lx:30,ly:7,anc:'start',short:'Pa Tueng',
   q:"Cosa cuoce la gente del posto nell'acqua più calda delle sorgenti di Pa Tueng?",o:['Il riso','Le pannocchie','Le uova','Il tè'],a:2,
   f:"Il geyser spruzza l'acqua a una decina di metri d'altezza.",
   place:'Pa Tueng Hot Springs',about:"Un geyser in un piccolo parco e vasche gratuite dove si immergono i piedi. Un po' di odore di zolfo.",
@@ -461,7 +461,7 @@ function mapSvg(){
   h+='<path d="M303.8 55 L327.5 78 L370 90 L417.3 110 L474.1 135 L517.6 155" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" opacity=".7"/>';
   [[30,230],[54,216],[150,240],[174,226],[24,420],[54,436],[196,140],[220,126],[180,450],[150,480],[390,250],[414,236],[110,560],[136,546],[340,420],[364,406]].forEach(function(m){
     h+='<path d="M'+m[0]+' '+m[1]+' l12 -18 l12 18" fill="none" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';});
-  h+='<text x="370" y="96" font-size="17" font-weight="700" letter-spacing="3">MYANMAR</text>';
+  h+='<text x="170" y="104" font-size="17" font-weight="700" letter-spacing="3">MYANMAR</text>';
   h+='<text x="574" y="420" font-size="17" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text>';
   h+='<text x="556" y="350" font-size="19" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text>';
   h+='<text x="24" y="646" font-size="14" font-weight="700" letter-spacing="2">10 km</text><path d="M24 654h95" stroke="var(--muted)" stroke-width="2"/>';
