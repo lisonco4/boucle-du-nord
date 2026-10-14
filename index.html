@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Boucle du Nord</title>
+<meta name="theme-color" content="#FAF3E0">
+<link rel="manifest" href="carnet.webmanifest">
+<link rel="apple-touch-icon" href="icons/carnet-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Boucle du Nord">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+/* Layout: carnet de route à colonne unique, carte schématique en tête, journées en frise horaire. */
+:root{
+  /* Charte de Lison. Thème clair unique, choisi volontairement.
+     Roses #F386AE / #E55D8E / #FBC9DC · crèmes #FAF3E0 / #FFFDF8 · pastels sauge, ciel, lavande · encres #1A1A1A / #4A4A4A.
+     Les pastels sont légèrement foncés pour les tracés de carte, pour rester lisibles sur la crème. */
+  --paper:#FAF3E0; --card:#FFFDF8; --ink:#1A1A1A; --muted:#4A4A4A; --line:#EADFC6;
+  --blush:#FBC9DC; --rose:#F386AE; --wine:#E55D8E; --river:#D5E3F2;
+  --sauge:#CAD8C5; --ciel:#D5E3F2; --lavande:#C6B6D9;
+  --d1:#F386AE; --d2:#9C87BC; --d3:#7FA3CC; --d4:#88AA80;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --thai:"Sarabun", "Noto Sans Thai", system-ui, sans-serif;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding-inline:20px;padding-block:28px 72px}
+a{color:var(--wine);text-underline-offset:3px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--rose);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+.thai{font-family:var(--thai);color:var(--muted);font-weight:400}
+.eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);font-weight:700}
+p{margin:0}
+
+/* Hero */
+.hero{display:grid;gap:14px;padding-block:8px 28px;border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(2.6rem,7vw,4.2rem);font-weight:700;letter-spacing:-.01em;color:var(--wine)}
+.hero h1 em{font-style:italic;font-weight:400;color:var(--rose)}
+.hero .lede{max-width:60ch;color:var(--ink);font-size:1.05rem}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{background:var(--blush);color:var(--ink);border-radius:999px;padding:5px 13px;font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums}
+
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line);margin-inline:-20px;padding:10px 20px;overflow-x:auto;white-space:nowrap}
+nav.toc a{display:inline-block;margin-right:16px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--muted)}
+nav.toc a:hover{color:var(--wine)}
+
+section{padding-block:40px 8px}
+section{scroll-margin-top:64px}
+section > h2{font-size:clamp(1.7rem,4vw,2.2rem);color:var(--wine);margin-bottom:6px}
+.sub{color:var(--muted);margin-bottom:22px;max-width:62ch}
+
+/* Map */
+.mapbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;overflow-x:auto}
+.mapbox svg{display:block;width:100%;min-width:320px;height:auto;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;font-size:.85rem}
+.legend span{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.legend i{display:inline-block;width:22px;height:4px;border-radius:2px}
+.stops{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 20px;margin-top:16px;padding:0;list-style:none;font-size:.88rem}
+.stops li{display:flex;gap:9px;align-items:baseline;min-width:0}
+.num{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--blush);border:1.5px solid var(--wine);color:var(--ink);font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Checklist */
+.check{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.check div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.check b{display:block;font-family:var(--display);font-size:1.05rem;color:var(--wine);margin-bottom:3px}
+.check p{font-size:.92rem}
+
+/* Day */
+.day{padding-block:40px 8px;border-top:1px solid var(--line);margin-top:24px}
+.dayhead{display:grid;gap:4px;margin-bottom:20px}
+.dayhead .tag{display:inline-block;width:fit-content;color:var(--ink);font-weight:700;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.dayhead h2{font-size:clamp(1.6rem,4vw,2.1rem);color:var(--ink)}
+.dayhead .meta{color:var(--muted);font-size:.92rem;font-variant-numeric:tabular-nums}
+.tl{display:grid;gap:0;list-style:none;padding:0;margin:0}
+.tl > li{display:grid;grid-template-columns:62px 1fr;gap:14px;min-width:0}
+.tl .t{font-variant-numeric:tabular-nums;font-weight:700;color:var(--wine);font-size:.92rem;padding-top:16px;text-align:right}
+.stop{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-block:6px;min-width:0}
+.stop h3{font-size:1.25rem;color:var(--ink);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.stop h3 .thai{font-size:.95rem}
+.stop p{margin-top:6px;font-size:.95rem}
+.stop .info{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;font-weight:600;background:var(--blush);border-radius:6px;padding:2px 8px;color:var(--ink)}
+.links{margin-top:10px;display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;font-weight:700}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.opt{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 13px;min-width:0}
+.opt b{display:block;font-family:var(--display);font-size:1rem;color:var(--wine)}
+.opt p{font-size:.86rem;margin-top:3px}
+.opt .links{margin-top:6px;font-size:.8rem}
+.points{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:10px}
+.points li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;min-width:0}
+.points li > div{min-width:0}
+.points b{font-family:var(--display);font-size:1rem;color:var(--wine)}
+.points p{font-size:.9rem;margin-top:2px}
+.ask{margin-top:12px;font-size:.88rem;font-weight:700;color:var(--rose)}
+.tip{margin-top:10px;font-size:.88rem;color:var(--ink);border-left:3px solid var(--rose);padding-left:10px}
+.leg .t{padding-top:6px;color:var(--muted);font-weight:600}
+.legline{display:flex;align-items:center;gap:10px;padding-block:6px;color:var(--muted);font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;min-width:0;flex-wrap:wrap}
+.legline svg{flex:none}
+.legline b{color:var(--ink);font-weight:700}
+.legline .road{flex:1;min-width:24px;border-top:2px dashed var(--line)}
+
+/* Hotels */
+.night{margin-bottom:30px}
+.night h3{font-size:1.3rem;color:var(--ink);margin-bottom:12px}
+.hotels{display:grid;gap:12px}
+.hotel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.hotel.pick{border:2px solid var(--rose)}
+.hotel .top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline}
+.hotel h4{margin:0;font-family:var(--display);font-size:1.15rem;font-weight:600}
+.price{font-weight:700;color:var(--wine);font-variant-numeric:tabular-nums;font-size:.95rem}
+.badge{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rose);margin-bottom:4px}
+.hotel p{font-size:.93rem;margin-top:6px}
+.addr{font-size:.85rem;color:var(--muted)}
+.warnbox{background:var(--blush);border-radius:12px;padding:14px 16px;font-size:.92rem;margin-bottom:18px}
+
+/* Food */
+.food{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.food div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.food h4{margin:0 0 4px;font-family:var(--display);font-size:1.08rem;color:var(--wine)}
+.food p{font-size:.9rem}
+.jay{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.jayflag{width:58px;height:58px;border-radius:8px;background:#F2C230;display:grid;place-items:center;font-family:var(--thai);font-size:2rem;font-weight:500;color:#C0262D;line-height:1}
+
+.phrases{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;display:grid;gap:10px}
+.phrases h3{font-size:1.2rem;color:var(--ink)}
+.phrases h4{margin:8px 0 0;font-family:var(--display);font-size:1rem;color:var(--wine)}
+.phrase{display:grid;gap:2px;background:var(--ciel);border-radius:10px;padding:10px 14px}
+.phrase .zh{font-size:1.5rem;line-height:1.35;color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+.phrase .th{font-size:1.4rem;color:var(--ink);font-family:var(--thai)}
+.phrase .fr{font-size:.85rem;color:var(--muted)}
+.lex{display:flex;flex-wrap:wrap;gap:6px}
+.lex span{font-size:.88rem;border-radius:6px;padding:3px 9px;color:var(--ink)}
+.lex .ok{background:var(--sauge)}
+.lex .no{background:var(--blush)}
+.todo{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.todo li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.todo input{flex:none;width:20px;height:20px;margin-top:2px;accent-color:var(--wine)}
+.todo label{font-size:.93rem;min-width:0}
+.todo .alt{display:inline-block;margin-top:4px;font-size:.86rem;color:var(--muted)}
+.todo li:has(input:checked) label{color:var(--muted);text-decoration:line-through}
+
+.tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{font-weight:700;color:var(--wine);border-bottom:0;font-size:1rem}
+.note{font-size:.88rem;color:var(--muted);margin-top:12px;max-width:66ch}
+
+/* Tips */
+.tips{display:grid;gap:10px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700;color:var(--ink)}
+details p,details ul{font-size:.93rem;margin-top:8px}
+details ul{padding-left:18px;margin-bottom:0}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+
+@media (max-width:600px){
+  body{font-size:17px}
+  .wrap{padding-inline:16px}
+  nav.toc{margin-inline:-16px;padding:12px 16px}
+  nav.toc a{font-size:.95rem;padding:6px 12px;margin-right:6px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+  .stop p,.points p{font-size:1rem}
+  .opt p{font-size:.95rem}
+  .tip{font-size:.95rem}
+  .legline{font-size:.95rem}
+  .opts{grid-template-columns:1fr}
+  .links{gap:8px}
+  .links a{display:inline-block;padding:7px 12px;border-radius:999px;background:var(--blush);color:var(--ink);text-decoration:none}
+  .stops{grid-template-columns:1fr}
+  .tl > li{grid-template-columns:1fr;gap:0}
+  .tl .t{text-align:left;padding-top:12px}
+  .leg .t{display:none}
+  .jay{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Chiang Rai · jeudi 15 → dimanche 18 octobre 2026</span>
+  <h1>Boucle du <em>Nord</em></h1>
+  <p class="lede">Quatre jours en scooter entre les théiers de Mae Salong, le Mékong, le Triangle d'Or et les jardins de Doi Tung. Une nuit par étape, 2h30 de route par jour au maximum, aucune frontière à passer, et le lundi matin reste libre pour le live.</p>
+  <div class="facts">
+    <span class="fact">4 jours · 3 nuits</span>
+    <span class="fact">≈ 400 km</span>
+        <span class="fact">Festival végétarien jusqu'au 18</span>
+        <span class="fact">Marche hors connexion</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sommaire">
+  <a href="#carte">Carte</a><a href="#j1">Jeu 15</a><a href="#j2">Ven 16</a><a href="#j3">Sam 17</a><a href="#j4">Dim 18</a><a href="#vege">Végé</a><a href="#tips">Tips</a>
+</nav>
+
+<!-- MAP -->
+<section id="carte">
+  <h2>La boucle</h2>
+  <p class="sub">Tracé indicatif, à l'échelle. Chaque couleur correspond à une journée. Pour la navigation, utilise les liens Maps de chaque étape. Les distances sont des estimations, à 10 % près : vérifie chaque trajet dans Maps le matin.</p>
+  <div class="mapbox">
+    <svg viewBox="0 0 620 650" role="img" aria-label="Carte de la boucle : Chiang Rai, Mae Salong, Chiang Saen, Triangle d'Or, Wat Tham Pla, Choui Fong, Doi Tung, Pa Tueng, retour à Chiang Rai">
+      <!-- frontières / rivières -->
+      <path d="M303.8 55.0 L327.5 78.0 L370.0 90.0 L417.3 110.0 L474.1 135.0 L517.6 155.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+      <path d="M568.7 20.0 L545.0 80.0 L526.1 125.0 L517.6 155.0 L528.0 200.0 L525.2 240.0 L549.8 290.0 L587.6 560.0" fill="none" stroke="var(--river)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <ellipse cx="474" cy="272" rx="13" ry="8" fill="var(--river)"/>
+      <text x="400" y="60" fill="var(--muted)" font-family="Manrope, sans-serif" font-size="13" font-weight="600" letter-spacing="2">BIRMANIE</text>
+      <text x="566" y="420" fill="var(--muted)" font-family="Manrope, sans-serif" font-size="13" font-weight="600" letter-spacing="2" transform="rotate(80 566 420)">LAOS</text>
+      <text x="548" y="345" fill="var(--d3)" font-family="Fraunces, serif" font-size="13" font-style="italic" transform="rotate(78 548 345)">Mékong</text>
+      <text x="40" y="440" fill="var(--muted)" font-family="Manrope, sans-serif" font-size="12" font-weight="600" letter-spacing="2">MONTAGNES</text>
+      <text x="40" y="456" fill="var(--muted)" font-family="Manrope, sans-serif" font-size="12" font-weight="600" letter-spacing="2">DE DOI MAE SALONG</text>
+
+      <!-- jour 1 -->
+      <path d="M284.9 600.0 L258.0 567.6 L280.1 490.0 L246.9 390.0 L228.1 370.0 L171.4 380.0 L124.1 360.0 L95.7 337.0" fill="none" stroke="var(--d1)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- jour 2 -->
+      <path d="M95.7 337.0 L124.1 352.0 L171.4 372.0 L228.1 362.0 L296.2 356.0 L370.0 330.0 L445.7 280.0 L516.6 235.3 L520.8 179.1 L513.8 156.4" fill="none" stroke="var(--d2)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      
+      <!-- jour 3 -->
+      <path d="M513.8 156.4 L504.4 150.0 L513.8 156.4 L464.6 140.0 L398.4 110.0 L326.5 82.0 L318.0 128.3 L306.4 180.6 L284.9 240.0 L262.8 310.1" fill="none" stroke="var(--d3)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- jour 4 (tracé selon l'hôtel) -->
+      <path d="M262.8 310.1 L292.0 272.0 L303.8 244.0 L280.0 234.0 L256.3 221.7" fill="none" stroke="var(--d4)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 6"/>
+      <path d="M256.3 221.7 L280.0 240.0 L298.0 250.0 L304.0 300.0 L302.2 364.0 L292.0 430.0 L290.1 490.0 L292.9 600.0" fill="none" stroke="var(--d4)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 6"/>
+
+      <!-- villes de repère -->
+      <g font-family="Manrope, sans-serif" font-size="12" fill="var(--muted)" font-weight="600">
+        <circle cx="296.2" cy="364" r="3.5" fill="var(--muted)"/><text x="312" y="372">Mae Chan</text>
+        <circle cx="326.5" cy="82" r="3.5" fill="var(--muted)"/><text x="336" y="78">Mae Sai</text>
+      </g>
+
+      <!-- étapes numérotées -->
+      <g font-family="Manrope, sans-serif" font-weight="700" font-size="11" text-anchor="middle">
+        <circle cx="284.9" cy="600" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="284.9" y="604" fill="var(--ink)">1</text>
+        <circle cx="258" cy="567.6" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="258" y="571.6" fill="var(--ink)">2</text>
+        <circle cx="95.7" cy="337" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="95.7" y="341" fill="var(--ink)">3</text>
+        <circle cx="516.6" cy="235.3" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="516.6" y="239.3" fill="var(--ink)">4</text>
+        <circle cx="474" cy="272" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="474" y="276" fill="var(--ink)">5</text>
+        <circle cx="538" cy="170" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="538" y="174" fill="var(--ink)">6</text>
+        <circle cx="498" cy="168" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="498" y="172" fill="var(--ink)">7</text>
+        <circle cx="516" cy="138" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="516" y="142" fill="var(--ink)">8</text>
+        <circle cx="306.4" cy="180.6" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="306.4" y="184.6" fill="var(--ink)">9</text>
+        <circle cx="262.8" cy="310.1" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="262.8" y="314.1" fill="var(--ink)">10</text>
+        <circle cx="256.3" cy="221.7" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="256.3" y="225.7" fill="var(--ink)">11</text>
+        <circle cx="246.9" cy="390" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="246.9" y="394" fill="var(--ink)">12</text>
+        <circle cx="306" cy="574" r="11" fill="var(--blush)" stroke="var(--wine)" stroke-width="2"/><text x="306" y="578" fill="var(--ink)">13</text>
+      </g>
+      <g font-family="Fraunces, serif" font-size="14" fill="var(--ink)" font-weight="600">
+        <text x="300" y="630">Chiang Rai</text>
+        <text x="322" y="579" font-size="12">Big Buddha</text>
+        <text x="244" y="572" text-anchor="end">Lalitta Café</text>
+        <text x="20" y="312">Mae Salong</text>
+        <text x="560" y="250" text-anchor="end" font-size="13">Chiang Saen</text>
+        <text x="458" y="296" text-anchor="end" font-size="13">Lac</text>
+        <text x="552" y="191">View Khong</text>
+        <text x="484" y="183" text-anchor="end" font-size="12">Hall of Opium</text>
+        <text x="516" y="118" text-anchor="middle" font-size="13">Triangle d'Or</text>
+        <text x="292" y="200" text-anchor="end">Wat Tham Pla</text>
+        <text x="248" y="334" text-anchor="end">Choui Fong</text>
+        <text x="241" y="214" text-anchor="end">Doi Tung</text>
+        <text x="232" y="408" text-anchor="end">Pa Tueng</text>
+      </g>
+      <!-- échelle -->
+      <g font-family="Manrope, sans-serif" font-size="11" fill="var(--muted)" font-weight="600">
+        <line x1="40" y1="620" x2="134.6" y2="620" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="40" y1="614" x2="40" y2="626" stroke="var(--muted)" stroke-width="2"/>
+        <line x1="134.6" y1="614" x2="134.6" y2="626" stroke="var(--muted)" stroke-width="2"/>
+        <text x="40" y="606">10 km</text>
+        <text x="590" y="40" text-anchor="middle" font-size="12">N ↑</text>
+      </g>
+    </svg>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--d1)"></i>Jeu 15 · 1h45</span>
+    <span><i style="background:var(--d2)"></i>Ven 16 · 1h45 + ville</span>
+    <span><i style="background:var(--d3)"></i>Sam 17 · ≈ 2h30 avec le belvédère</span>
+    <span><i style="background:var(--d4)"></i>Dim 18 · ≈ 2h20, avec le Big Buddha</span>
+  </div>
+  <ol class="stops">
+    <li><span class="num">1</span>Chiang Rai, départ et retour</li>
+    <li><span class="num">2</span>Lalitta Café</li>
+    <li><span class="num">3</span>Mae Salong, Twins Farm et marché</li>
+    <li><span class="num">4</span>Chiang Saen, l'ancienne cité</li>
+    <li><span class="num">5</span>Lac de Chiang Saen, en option vendredi soir</li>
+    <li><span class="num">6</span>View Khong Hotel, au bord du Mékong</li>
+    <li><span class="num">7</span>Hall of Opium, samedi 10h</li>
+    <li><span class="num">8</span>Triangle d'Or, belvédère</li>
+    <li><span class="num">9</span>Wat Tham Pla, la grotte aux singes</li>
+    <li><span class="num">10</span>Choui Fong Tea</li>
+    <li><span class="num">11</span>Doi Tung, villa et jardins royaux</li>
+    <li><span class="num">12</span>Pa Tueng, sources chaudes, jeudi</li>
+    <li><span class="num">13</span>Big Buddha, Wat Huay Pla Kang, dimanche</li>
+  </ol>
+</section>
+
+<!-- DAY 1 -->
+<section class="day" id="j1">
+  <div class="dayhead">
+    <span class="tag" style="background:var(--d1)">Jour 1 · jeudi 15 octobre</span>
+    <h2>Chiang Rai → Mae Salong <span class="thai">แม่สลอง</span></h2>
+    <p class="meta">Scooter : 1h55 au total · ≈ 80 km · départ 9h15 · nuit à Mae Salong</p>
+  </div>
+  <ol class="tl">
+    <li class="leg"><span class="t">9h15</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Chiang Rai</b> → <b>Lalitta Café</b> · 15 min · 7 km<span class="road"></span></div></li>
+    <li><span class="t">9h30</span>
+      <div class="stop"><h3>Petit-déjeuner au Lalitta Café</h3>
+        <p>Un café-jardin inspiré de la forêt mythique d'Himmapan : cascades, ponts de pierre, plantes et sculptures partout. C'est avant tout un décor, et le petit-déjeuner au milieu des cascades est la meilleure façon d'en profiter sans se presser.</p>
+        <div class="info"><span class="chip">Ouvert 8h – 20h</span><span class="chip">Entrée 60 ฿ par personne, convertie en boisson</span><span class="chip">≈ 500 ฿ le petit-déjeuner pour deux</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Lalitta+Cafe+Chiang+Rai" target="_blank" rel="noopener">Voir les photos ↗</a></div></div></li>
+    <li class="leg"><span class="t">11h</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Lalitta Café</b> → <b>Pa Tueng</b>, près de Mae Chan · 40 min · 30 km de route plate<span class="road"></span></div></li>
+    <li><span class="t">11h45</span>
+      <div class="stop"><h3>Pa Tueng Hot Springs <span class="thai">บ่อน้ำพุร้อนป่าตึง</span></h3>
+        <p>Une pause sur la route de la montée. Un geyser qui jaillit à une dizaine de mètres dans un petit parc, des bassins gratuits où les habitants trempent leurs pieds, et des œufs qu'on fait cuire dans l'eau la plus chaude. On ne s'y baigne pas comme dans une piscine : on trempe les pieds, ou on loue un bain privé.</p>
+        <div class="info"><span class="chip">9h – 18h</span><span class="chip">Bains de pieds gratuits</span><span class="chip">Bains privés payants</span><span class="chip">45 min</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Pa+Tueng+Hot+Springs&query_place_id=ChIJG_i8gDr81jAROG8mZbGQzWU" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Pa+Tueng+hot+spring+geyser" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Pas besoin de maillot : un short ou un pantalon à remonter, et une petite serviette. Prends un maillot seulement si tu veux tester un bain privé, et jette un œil à la salle avant de payer. Des travaux étaient en cours cette année, certains bassins peuvent être fermés. Odeur de soufre.</p></div></li>
+    <li class="leg"><span class="t">12h30</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Pa Tueng</b> → <b>Mae Salong</b> · 1h · 45 km, dont 30 min de montée raide<span class="road"></span></div></li>
+    <li><span class="t">13h30</span>
+      <div class="stop"><h3>Déjeuner à Xin Shi Dai Bakery <span class="thai">แม่สลอง</span></h3>
+        <p>Une boulangerie-café familiale de plus de 50 ans, dans son jus, en contrebas de la rue principale. Tout est fait maison au vrai beurre. La cuisinière prépare des plats adaptables en végan : pizza yunnanaise, tempura, et des onion rings dont les clients parlent encore. Garde de la place pour le roulé à la vanille.</p>
+        <div class="info"><span class="chip">8h – 21h</span><span class="chip">Petits prix</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Xin+Shi+Dai+Bakery+Mae+Salong" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Plan B si c'est fermé : <a href="https://www.google.com/maps/search/?api=1&query=Yang+Ming&query_place_id=ChIJf3bZobLm1jARHIF32l_KOlI" target="_blank" rel="noopener">Yang Ming</a>, 100 % végétarien · <a href="https://www.google.com/maps/search/?api=1&query=Salima+Restaurant&query_place_id=ChIJ694NYq3m1jARg1xdkzSs944" target="_blank" rel="noopener">Salima</a>, yunnanais, légumes sautés · <a href="https://www.google.com/maps/search/?api=1&query=Sweet+Mae+Salong+Cafe" target="_blank" rel="noopener">Sweet Mae Salong</a>, curry et roti.</p></div></li>
+    <li><span class="t">14h45</span>
+      <div class="stop"><h3>Check-in à Twins Farm</h3><p>Des chambres sur la montagne, avec balcon face aux crêtes. Les clients parlent d'une vue superbe le matin, de lucioles et d'étoiles le soir, d'un wifi étonnamment rapide et d'une équipe très gentille. 4,4 sur 106 avis Google.</p>
+        <div class="info"><span class="chip">Wifi rapide</span><span class="chip">Parking sur place</span><span class="chip">Nuits fraîches</span></div>
+        <p class="tip">Vérifie le trajet hôtel – village dans Maps dès l'arrivée, pour caler le départ au marché vendredi. L'eau chaude marche au gaz et peut s'arrêter : signale-le à l'équipe si besoin. Demande une couverture en plus, il fait froid la nuit.</p>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Twins+Farm+Mae+Salong&query_place_id=ChIJs70DWfPh1jAR4W7RwPOGkjs" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Twins+Farm+Mae+Salong" target="_blank" rel="noopener">Voir les photos ↗</a></div></div></li>
+    <li><span class="t">15h30</span>
+      <div class="stop"><h3>Le village, point par point</h3>
+        <p>Les points sont à quelques minutes de scooter les uns des autres. Gare le scooter et marche autour de chacun.</p>
+        <ol class="points">
+          <li><span class="num">a</span><div><b>Chinese Martyrs Memorial Museum</b><p>Trois bâtiments de style chinois, photos et documents sur l'armée nationaliste chinoise réfugiée ici après 1949, et son passage de l'opium au thé. Ouvert 8h – 17h, petit droit d'entrée, prévois des petites coupures.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Chinese+Martyrs+Memorial+Museum+Mae+Salong" target="_blank" rel="noopener">Maps ↗</a></div></div></li>
+          <li><span class="num">b</span><div><b>Le tombeau du général Tuan</b><p>Le fondateur de Mae Salong repose sur une colline au-dessus du village, au pied d'une petite plantation. Endroit très calme, avec une vue sur le village.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=General+Tuan+Shi+Wen+Tomb+Mae+Salong" target="_blank" rel="noopener">Maps ↗</a></div></div></li>
+          <li><span class="num">c</span><div><b>La rue des maisons de thé</b><p>Le long de la rue principale, les échoppes servent des dégustations gratuites d'oolong, sans obligation d'achat. C'est là qu'on achète le thé à la source : 300 à 1 500 ฿ les 100 g selon la qualité.</p></div></li>
+          <li><span class="num">d</span><div><b>Le marché de l'après-midi</b><p>Au sud du village, des Akha vendent thé, champignons, herbes et artisanat. Plus touristique que le marché du matin, mais vivant.</p></div></li>
+          <li><span class="num">e</span><div><b>Repérage du marché du matin</b><p>Passe devant pour savoir où aller demain à 7h : derrière Shin Sane, en montant à gauche après le 7-Eleven.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok" target="_blank" rel="noopener">Maps ↗</a></div></div></li>
+        </ol></div></li>
+    <li><span class="t">17h15</span>
+      <div class="stop"><h3>Coucher de soleil sur les plantations</h3>
+        <p>Deux options :</p>
+        <div class="opts">
+          <div class="opt"><b>Mae Salong Flower Hills</b><p>Une grande terrasse au-dessus des plantations, près du village, donc sur la route du dîner. La plus longue carte de boissons du coin. Ouvert jusqu'à 21h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Depuis ton balcon</b><p>La vue sur les montagnes de Twins Farm, sans reprendre le scooter. Les clients conseillent d'éteindre la lumière à la nuit tombée pour voir les lucioles.</p></div>
+        </div>
+        <p class="tip">Soleil couché vers 17h50.</p></div></li>
+    <li><span class="t">19h</span>
+      <div class="stop"><h3>Dîner chez Sihai <span class="thai">ซื่อไห่</span></h3>
+        <p>Une cuisine yunnanaise familiale à l'entrée est du village. Les légumes viennent de la ferme bio des propriétaires. On commande une fondue aux herbes à partager, et les shiitakes sautés au wok à la sauce soja noire, que les clients adorent. Thé offert à la fin du repas.</p>
+        <div class="info"><span class="chip">8h – 21h</span><span class="chip">Demande un bouillon sans viande</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Sihai+Mala+Suki+Yunnan+Mae+Salong&query_place_id=ChIJT8JP5frn1jARCg132V4_PSg" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a></div>
+        <p class="tip">En option : <a href="https://www.google.com/maps/search/?api=1&query=jubaotang+restaurant+Mae+Salong&query_place_id=ChIJJbdsp_7n1jARZGCc5BwTdnA" target="_blank" rel="noopener">Jùbǎotáng 聚寶堂</a>, la minuscule cantine d'un seul cuisinier à côté du marché. Légumes sautés avec riz, thé et soupe offerts. Ouvert 16h – 20h. Montre la carte des phrases, section Végé.</p></div></li>
+  </ol>
+</section>
+
+<!-- DAY 2 -->
+<section class="day" id="j2">
+  <div class="dayhead">
+    <span class="tag" style="background:var(--d2)">Jour 2 · vendredi 16 octobre</span>
+    <h2>Mae Salong → Chiang Saen <span class="thai">เชียงแสน</span></h2>
+    <p class="meta">Scooter : 1h45 de route, plus quelques trajets courts en ville · ≈ 100 km · départ 10h45 · arrivée à l'hôtel 13h30, rendez-vous d'Ugo à 14h · nuit à Chiang Saen, au bord du Mékong</p>
+  </div>
+  <ol class="tl">
+    <li><span class="t">7h</span>
+      <div class="stop"><h3>Le marché du matin</h3>
+        <p>Le marché des habitants, ouvert tous les jours. Les villageois des montagnes, surtout des Akha, descendent vendre légumes, herbes, champignons et thé. Prends le petit-déjeuner sur place : lait de soja chaud et beignets chinois. C'est petit, et l'essentiel se passe avant 8h.</p>
+        <div class="info"><span class="chip">Dès 6h</span><span class="chip">Trajet depuis l'hôtel à vérifier la veille</span><span class="chip">Petites coupures</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Mae+Salong+morning+market+Akha" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Brouillard possible tôt le matin dans la descente : roule doucement, phare allumé.</p></div></li>
+    <li><span class="t">8h30</span>
+      <div class="stop"><h3>La matinée à Twins Farm</h3><p>Petit-déjeuner en rentrant du marché : demande-le pour 8h30 la veille, l'équipe s'adapte et peut le servir dans la chambre. Puis profite de la vue jusqu'au départ.</p>
+        <p class="tip">Départ à 10h45 au plus tard : il faut être à l'hôtel à 13h30 pour le rendez-vous en ligne d'Ugo à 14h.</p></div></li>
+    <li class="leg"><span class="t">10h45</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Mae Salong</b> → <b>Mae Chan</b> · 1h · 40 km de descente sinueuse<span class="road"></span></div></li>
+    <li><span class="t">11h45</span>
+      <div class="stop"><h3>Déjeuner rapide à Mae Chan</h3>
+        <p>45 minutes maximum, pour repartir à 12h30.</p>
+        <div class="opts">
+          <div class="opt"><b>Ahsa Cuisine</b><p>Une ferme-restaurant face aux rizières, très calme, près de Mae Chan. 10 minutes de détour : seulement si vous êtes en avance. Ouvert 10h – 16h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Ahsa+Cuisine+Mae+Chan&query_place_id=ChIJkW-I3F771jARg_XJ3YAO7K4" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Parabola</b><p>Le plus pratique : un grand café directement sur la route à Mae Chan, avec terrasse à l'arrière. Gâteaux, desserts thaïs et quelques plats chauds. Ouvert 7h30 – 16h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Parabola+Mae+Chan&query_place_id=ChIJp2ukiA7_1jAR-2vq93OUt68" target="_blank" rel="noopener">Maps ↗</a></div></div>
+        </div>
+        <p class="tip">C'est encore le festival végétarien : les stands jay aux drapeaux jaunes du marché de Mae Chan sont une bonne solution express.</p></div></li>
+    <li class="leg"><span class="t">12h30</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Mae Chan</b> → <b>Chiang Saen</b>, View Khong Hotel · 45 min · 40 km de route plate · 1h45 de route au total<span class="road"></span></div></li>
+    <li><span class="t">13h30</span>
+      <div class="stop"><h3>Check-in à View Khong Hotel</h3><p>Un petit hôtel récent sur la route du fleuve, entre la vieille ville de Chiang Saen et le Triangle d'Or, à 3 km du belvédère. Très bien noté : 4,7 sur Google, 9,2 sur Trip.com. Le restaurant Golden Time est juste à côté.</p>
+        <p class="tip"><b>Rendez-vous en ligne d'Ugo à 14h.</b> Le check-in officiel est à 14h : l'accès à la chambre à 13h30 doit être demandé à l'avance, parfois contre un petit supplément. Le wifi annoncé est de 25 Mb/s et plus, et un client le dit bon. Teste-le dès l'arrivée, et garde le partage de connexion 4G en secours. Plan B si la chambre n'est pas prête : le VIEW CAFE de l'hôtel.</p>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=View+Khong+Hotel+Chiang+Saen&query_place_id=ChIJRwg_3PFD1jARU9CsnZKqjAY" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a></div></div></li>
+        <li class="leg"><span class="t">15h30</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>View Khong Hotel</b> → <b>Triangle d'Or</b> · 5 min · 3 km, juste après le rendez-vous d'Ugo<span class="road"></span></div></li>
+    <li><span class="t">15h35</span>
+      <div class="stop"><h3>Le belvédère du Triangle d'Or <span class="thai">สามเหลี่ยมทองคำ</span></h3>
+        <p>À 5 minutes au nord de l'hôtel. À Sop Ruak, la rivière Ruak rejoint le Mékong : la Thaïlande, le Laos et la Birmanie se font face, avec un grand bouddha doré au bord de l'eau. Une halte de 15 minutes suffit, le site est bordé de boutiques de souvenirs.</p>
+        <div class="info"><span class="chip">Gratuit</span><span class="chip">5 min de scooter</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Golden+Triangle+Park+Sop+Ruak" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Golden+Triangle+Sop+Ruak+Mekong" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Les bateaux s'arrêtent souvent sur une île-marché côté Laos. Pour ne passer aucune frontière, reste à terre.</p></div></li>
+    <li class="leg"><span class="t">15h55</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Triangle d'Or</b> → <b>Chiang Saen</b>, vieille ville · 15 min · 9 km<span class="road"></span></div></li>
+    <li><span class="t">16h10</span>
+      <div class="stop"><h3>L'ancienne cité, point par point</h3>
+        <p>Chiang Saen fut une capitale du royaume du Lanna. Il en reste des remparts et des dizaines de temples en brique envahis par les arbres. Tout se fait en quelques minutes de scooter, il n'y a presque personne.</p>
+        <ol class="points">
+          <li><span class="num">a</span><div><b>Wat Pa Sak</b><p>Le plus beau site, au milieu d'une forêt de tecks, avec un chedi orné de stucs. À faire en premier : il ferme à 17h. Entre 50 et 100 ฿.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen" target="_blank" rel="noopener">Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Wat+Pa+Sak+Chiang+Saen" target="_blank" rel="noopener">Photos ↗</a></div></div></li>
+          <li><span class="num">b</span><div><b>Wat Phra That Chedi Luang</b><p>Le plus haut chedi de la ville, 58 m, devant la statue du fondateur Phaya Saen Phu. Gratuit.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Wat+Phra+That+Chedi+Luang+Chiang+Saen" target="_blank" rel="noopener">Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Wat+Phra+That+Chedi+Luang+Chiang+Saen" target="_blank" rel="noopener">Photos ↗</a></div></div></li>
+          <li><span class="num">c</span><div><b>Les petites ruines</b><p>Le chedi octogonal du Wat Phra Yuen, et le Wat Prasat Khum, bien conservé, près du Mékong.</p></div></li>
+          <li><span class="num">d</span><div><b>Wat Phra That Chom Kitti</b><p>Un chedi légèrement penché sur une colline au nord des remparts, avec vue sur le Mékong et la ville. Escaliers glissants s'il a plu.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Wat+Phra+That+Chom+Kitti+Chiang+Saen" target="_blank" rel="noopener">Maps ↗</a></div></div></li>
+        </ol>
+        <div class="info"><span class="chip">Épaules et genoux couverts</span></div></div></li>
+    <li class="leg"><span class="t">17h15</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Chiang Saen</b> → <b>View Khong Hotel</b> · 10 min · 6 km par la route du fleuve<span class="road"></span></div></li>
+    <li><span class="t">17h25</span>
+      <div class="stop"><h3>Coucher de soleil au bord du Mékong, devant l'hôtel</h3>
+        <p>Le fleuve est à l'est : le soleil se couche dans ton dos, côté collines, et le ciel devient rose au-dessus du Mékong et du Laos. Depuis le balcon si tu as une chambre côté fleuve, sinon sur la rive juste devant l'hôtel, ou en terrasse au Golden Time voisin. Soleil couché vers 17h50.</p>
+        <p class="tip">Envie de plus ? Le belvédère du Triangle d'Or est à 5 minutes, pour l'heure bleue vers 18h15. Ou le lac de Chiang Saen, à 10 minutes, si tu préfères voir le soleil se coucher sur l'eau.</p></div></li>
+    <li><span class="t">19h</span>
+      <div class="stop"><h3>Dîner près de l'hôtel, à décider sur place</h3>
+        <div class="opts">
+          <div class="opt"><b>Golden Home</b><p>Au Triangle d'Or, 5 minutes en scooter. Le propriétaire a une formation de chef, cuisine fusion, menu en anglais : un habitant le classe parmi les meilleures tables du coin.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Golden+Home+Chiang+Saen&query_place_id=ChIJI4wrD0tD1jARARgEfPJVVgM" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Golden Time</b><p>Juste à côté de l'hôtel, à pied, au bord du fleuve, musique live. Champignons enoki frits, rouleaux de printemps. 12h – 22h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Golden+Time+Chiang+Saen&query_place_id=ChIJV35A499D1jARhuNZqdSTDA4" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Mekong Pizza</b><p>Au Triangle d'Or, 5 minutes en scooter, face au Mékong : bons produits, salades fraîches. Le plus simple en végé. 10h30 – 21h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Mekong+Pizza&query_place_id=ChIJW73taDVD1jARqOBajZ1Nv9Q" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Somkid</b><p>Musique live, ambiance agréable. Menu en thaï uniquement : sors la carte des phrases. 10h – 22h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Somkid+Restaurant+Cafe&query_place_id=ChIJwapdSdZd1jARx6oQTlJXiGk" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Thai Kitchen · ครัวไท</b><p>Terrasse au bord du fleuve, cuisine thaïe classique, ouvert jusqu'à minuit.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Thai+Kitchen+Chiang+Saen&query_place_id=ChIJe4WDm7pE1jARaVnsq1yCh2o" target="_blank" rel="noopener">Maps ↗</a></div></div>
+        </div></div></li>
+  </ol>
+</section>
+
+<!-- DAY 3 -->
+<section class="day" id="j3">
+  <div class="dayhead">
+    <span class="tag" style="background:var(--d3)">Jour 3 · samedi 17 octobre</span>
+    <h2>Chiang Saen → la grotte → le thé</h2>
+    <p class="meta">Scooter : environ 2h30 au total avec l'aller-retour au belvédère · ≈ 105 km · musée le matin, départ 12h05 après le check-out · nuit à Katiliya Park Villa</p>
+  </div>
+  <ol class="tl">
+    <li><span class="t">8h</span>
+      <div class="stop"><h3>Petit-déjeuner à l'hôtel</h3><p>Inclus dans ta chambre, au VIEW CAFE de View Khong, servi de 7h à 10h.</p></div></li>
+    <li class="leg"><span class="t">9h50</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>View Khong Hotel</b> → <b>Hall of Opium</b> · 5 min · 3 km<span class="road"></span></div></li>
+    <li><span class="t">10h</span>
+      <div class="stop"><h3>Hall of Opium</h3>
+        <p>Le meilleur musée du nord de la Thaïlande, créé par la fondation royale Mae Fah Luang. On entre par un long tunnel sombre, puis l'exposition raconte l'histoire de la région que tu traverses : pourquoi des soldats chinois ont fondé Mae Salong, pourquoi le thé a remplacé le pavot, et pourquoi les jardins de Doi Tung existent. Certaines salles sont dures sur les effets de l'addiction.</p>
+        <div class="info"><span class="chip">Mar – dim · 8h30 – 16h</span><span class="chip">200 ฿ par personne</span><span class="chip">1h45</span><span class="chip">5 min de l'hôtel</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Hall+of+Opium+Golden+Triangle+Park" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Hall+of+Opium+Golden+Triangle+museum" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Sors du musée à 11h45 au plus tard pour rendre la chambre à 12h. Pour ne pas regarder l'heure : fais le check-out avant de partir, à 9h45, et laisse tes sacs à la réception. Tu les récupères en repassant, et tu peux rester au musée jusqu'à 12h. Le belvédère, tu l'as fait vendredi.</p></div></li>
+    <li class="leg"><span class="t">11h45</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Hall of Opium</b> → <b>View Khong Hotel</b> · 5 min · 3 km<span class="road"></span></div></li>
+    <li><span class="t">12h</span>
+      <div class="stop"><h3>Check-out de View Khong</h3><p>Récupère tes sacs et rends la chambre avant 12h.</p></div></li>
+    <li class="leg"><span class="t">12h05</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>View Khong Hotel</b> → <b>Wat Tham Pla</b> · 50 min · 45 km, par le Triangle d'Or et la route de la frontière, sans traverser le centre de Mae Sai<span class="road"></span></div></li>
+    <li><span class="t">13h</span>
+      <div class="stop"><h3>Wat Tham Pla, la grotte aux singes <span class="thai">วัดถ้ำปลา</span></h3>
+        <p>Un temple rouge et or adossé à la falaise, une source claire remplie d'énormes poissons que l'on nourrit, et une grotte-sanctuaire en haut des escaliers. Et des singes partout, très sûrs d'eux. C'est un lieu de culte local, peu touristique.</p>
+        <div class="info"><span class="chip">6h – 18h</span><span class="chip">Gratuit, don libre</span><span class="chip">1h</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Wat+Tham+Pla+Mae+Sai+monkey+cave" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Prends un bâton de bambou à l'entrée et tape-le au sol si un singe insiste. Rien dans les mains, sac fermé, lunettes rangées.</p></div></li>
+    <li class="leg"><span class="t">14h</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Wat Tham Pla</b> → <b>Choui Fong</b> · près de Mae Chan · 20 min · 15 km<span class="road"></span></div></li>
+    <li><span class="t">14h20</span>
+      <div class="stop"><h3>Déjeuner et balade à Choui Fong Tea <span class="thai">ไร่ชาฉุยฟง</span></h3>
+        <p>Une des plus grandes plantations de thé du pays, fondée en 1977 : 160 hectares de terrasses en vagues sur les collines. Balade libre dans les rangs, dégustation à la boutique, puis une pause au café vitré face aux théiers. Les desserts au matcha ont la cote, et l'oolong à l'osmanthus aussi.</p>
+        <div class="info"><span class="chip">8h30 – 17h30</span><span class="chip">Entrée gratuite</span><span class="chip">Pas de visite guidée</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Choui+Fong+Tea+Plantation&query_place_id=ChIJg_wdGB_51jARo1fdwwocqUg" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Choui+Fong+Tea+Plantation" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Le café vitré sert surtout des boissons, des gâteaux et quelques plats : arrivée vers 14h20, prends un en-cas avant la grotte. Si tu veux un vrai repas, <a href="https://www.google.com/maps/search/?api=1&query=Wiengping%27s+Restaurant+Mae+Chan&query_place_id=ChIJ1xSafFr51jARYEzYW0rlf-8" target="_blank" rel="noopener">Wiengping's</a> est à l'entrée de la plantation : cuisine du nord, des clients végétariens y ont été très bien servis, 9h – 20h.</p></div></li>
+    <li class="leg"><span class="t">16h15</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Choui Fong</b> → <b>Katiliya Park Villa</b> · Pa Sang · 10 min · 4 km<span class="road"></span></div></li>
+    <li><span class="t">16h25</span>
+      <div class="stop"><h3>Check-in à Katiliya Park Villa</h3>
+        <p>Des villas dans un grand parc au pied des collines, avec piscine, salle de jeux, vélos prêtés et animaux en liberté, dont des cygnes. Le restaurant est en haut, au Katiliya Mountain Resort : une navette gratuite fait la liaison.</p>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Katiliya+Park+Villa&query_place_id=ChIJxxSQBwMH1zARtqH1KtONN30" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Katiliya+Park+Villa+Chiang+Rai" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Plusieurs clients signalent des fourmis dans les chambres le soir. Ne laisse pas de nourriture ouverte, et demande à changer de chambre si besoin.</p></div></li>
+    <li class="leg"><span class="t">16h45</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Katiliya Park Villa</b> → <b>Belvédère de Mae Salong Nai</b> · 30 min · 18 km de montée par la route 1130<span class="road"></span></div></li>
+    <li><span class="t">17h15</span>
+      <div class="stop"><h3>Coucher de soleil au belvédère de Mae Salong Nai</h3>
+        <p>Un belvédère sur la crête, avec vue des deux côtés de la montagne. Les voyageurs le trouvent superbe au coucher du soleil. Soleil couché vers 17h50.</p>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Mae+Salong+Nai+Viewpoint&query_place_id=ChIJ06zaqvLl1jARxJ21tzkExdA" target="_blank" rel="noopener">Maps ↗</a></div>
+        <p class="tip">Le belvédère est souvent peu fréquenté le soir et un peu négligé : c'est la vue qui compte. Retour de nuit, polaire et phare allumé, avec le dîner au Cave sur le chemin.</p></div></li>
+    <li><span class="t">19h</span>
+      <div class="stop"><h3>Dîner, à choisir sur place</h3>
+        <div class="opts">
+          <div class="opt"><b>The Cave Restaurant &amp; Cellar</b><p>Sur la route 1130, entre le belvédère et ta villa : idéal en redescendant. Une des meilleures tables fusion du coin, cuisine thaïe, italienne, mexicaine et européenne, très soignée, plus chère. 11h – 21h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=The+Cave+Restaurant+Cellar+Mae+Chan&query_place_id=ChIJw0Yo-k_71jARo-aqUbnueX4" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Katiliya Mountain Resort</b><p>Le plus simple si tu restes sur place. Carte et prix non trouvés : demande les options végétariennes en arrivant.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Katiliya+Mountain+Resort&query_place_id=ChIJAQAAAADj1jARYiwefDFkegg" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Gorath, Mae Chan</b><p>Le meilleur pour le végétarien, mais à 20 minutes. 8h30 – 21h30.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Gorath+Restaurant+Mae+Chan&query_place_id=ChIJwT1NH5f_1jARoxGGh38BFJo" target="_blank" rel="noopener">Maps ↗</a></div></div>
+        </div></div></li>
+  </ol>
+</section>
+
+<!-- DAY 4 -->
+<section class="day" id="j4">
+  <div class="dayhead">
+    <span class="tag" style="background:var(--d4)">Jour 4 · dimanche 18 octobre</span>
+    <h2>Doi Tung, puis retour</h2>
+    <p class="meta">Scooter : environ 2h20 au total · ≈ 110 km · retour à Chiang Rai vers 16h15</p>
+  </div>
+  <ol class="tl">
+    <li><span class="t">8h</span>
+      <div class="stop"><h3>Petit-déjeuner à l'hôtel</h3><p>Inclus dans ta réservation. Il se prend en haut, au Katiliya Mountain Resort : la navette gratuite fait la liaison depuis la villa.</p>
+        <p class="tip">Demande la veille l'heure de la première navette, et les options végétariennes.</p></div></li>
+    <li class="leg"><span class="t">9h15</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Katiliya Park Villa</b> → <b>Doi Tung</b> · 45 min · 35 km, par la nationale puis la montée<span class="road"></span></div></li>
+    <li><span class="t">10h</span>
+      <div class="stop"><h3>Doi Tung, la villa et les jardins royaux <span class="thai">ดอยตุง</span></h3>
+        <p>Sur ces montagnes qui cultivaient l'opium, la princesse mère a lancé à la fin des années 80 un projet qui a remplacé le pavot par le café, la macadamia et l'artisanat. Tu visites sa villa de style chalet suisse et surtout les jardins de Mae Fah Luang, parmi les plus beaux du pays, fleuris toute l'année. Le Hall of Opium raconte le début de l'histoire, Doi Tung en raconte la fin.</p>
+        <div class="info"><span class="chip">8h – 17h</span><span class="chip">Entrées payantes, prix à vérifier sur place</span><span class="chip">2h</span><span class="chip">Épaules et genoux couverts dans la villa</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Mae+Fah+Luang+Garden+Doi+Tung" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Dimanche, il y a du monde et beaucoup de séances photo. Le site est grand : compte 2h. Café Doi Tung à goûter sur place.</p></div></li>
+    <li><span class="t">12h</span>
+      <div class="stop"><h3>Déjeuner sur le chemin du retour</h3>
+        <div class="opts">
+          <div class="opt"><b>KruaTamnak, Doi Tung</b><p>Si tu déjeunes en haut, après les jardins. Dès 11h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=KruaTamnak+Doi+Tung&query_place_id=ChIJu45f3dTw1jARt03FMW2eY3A" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Ahsa Cuisine</b><p>Si tu ne l'as pas fait vendredi : la ferme-restaurant face aux rizières. Jusqu'à 16h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Ahsa+Cuisine+Mae+Chan&query_place_id=ChIJkW-I3F771jARg_XJ3YAO7K4" target="_blank" rel="noopener">Maps ↗</a></div></div>
+          <div class="opt"><b>Gorath, Mae Chan</b><p>Le pad thaï végé que les voyageurs adorent, sur la route.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Gorath+Restaurant+Mae+Chan&query_place_id=ChIJwT1NH5f_1jARoxGGh38BFJo" target="_blank" rel="noopener">Maps ↗</a></div></div>
+        </div></div></li>
+    <li class="leg"><span class="t">13h30</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Doi Tung</b> → <b>Wat Huay Pla Kang</b> · par Mae Chan · 1h20 · 65 km, petit détour à l'entrée de Chiang Rai<span class="road"></span></div></li>
+    <li><span class="t">14h50</span>
+      <div class="stop"><h3>Le « Big Buddha » de Wat Huay Pla Kang <span class="thai">วัดห้วยปลากั้ง</span></h3>
+        <p>La statue blanche géante que tout le monde appelle Big Buddha est en fait Guanyin, la déesse de la miséricorde, de style chinois : 69 m, posée sur la colline. Un ascenseur monte jusque dans la tête, avec vue sur les montagnes autour de Chiang Rai. À côté, une pagode de neuf étages aux escaliers bordés de dragons, où l'on peut monter à pied.</p>
+        <div class="info"><span class="chip">Entrée libre</span><span class="chip">Ascenseur 40 ฿, billets jusqu'à 18h</span><span class="chip">1h</span><span class="chip">Épaules et genoux couverts, chaussures retirées</span></div>
+        <div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Wat+Huay+Pla+Kang&query_place_id=ChIJE7rdqpsG1zAR64zTj5CGWiw" target="_blank" rel="noopener">Ouvrir dans Maps ↗</a><a href="https://www.google.com/search?tbm=isch&q=Wat+Huay+Pla+Kang+Guanyin" target="_blank" rel="noopener">Voir les photos ↗</a></div>
+        <p class="tip">Une navette gratuite monte du parking jusqu'à la statue.</p></div></li>
+    <li class="leg"><span class="t">16h</span><div class="legline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17" r="3"/><circle cx="18.5" cy="17" r="3"/><path d="M8.5 17h7l2-6h-4l-2-4H9"/></svg><b>Wat Huay Pla Kang</b> → <b>Chiang Rai</b> · centre · 15 min · 8 km<span class="road"></span></div></li>
+    
+    <li><span class="t">16h15</span>
+      <div class="stop"><h3>Retour à Chiang Rai</h3><p>Rends le scooter. C'est le dernier soir du festival végétarien, et Kunda est ouvert le dimanche jusqu'à 19h30.</p></div></li>
+  </ol>
+</section>
+
+<!-- TIPS -->
+<section id="vege">
+  <h2>Manger végé : la carte à montrer</h2>
+  <div class="jay">
+    <div class="jayflag" aria-hidden="true">เจ</div>
+    <p><b>Repère le drapeau jaune avec le caractère rouge เจ (« jay »).</b> Il signale une cuisine entièrement végane : ni viande, ni poisson, ni œuf, ni lait, et souvent sans ail ni oignon. Pendant le festival, on en voit partout, même dans les cantines qui servent de la viande le reste de l'année.</p>
+  </div>
+  <div class="phrases" id="phrases">
+    <h3>Carte à montrer au restaurant</h3>
+    <p class="sub" style="margin-bottom:12px">Mae Salong parle chinois du Yunnan et thaï. Montre l'écran, c'est plus simple que de prononcer.</p>
+    <div class="phrase"><span class="zh">我吃素，不要肉，不要鱼，不要蚝油。</span><span class="fr">Je suis végétarienne : pas de viande, pas de poisson, pas de sauce d'huître.</span></div>
+    <div class="phrase"><span class="zh">请用素的汤。</span><span class="fr">Un bouillon végétarien, s'il vous plaît.</span></div>
+    <div class="phrase"><span class="th">กินเจ · ไม่ใส่เนื้อสัตว์</span><span class="fr">« Kin jay » · sans viande, en thaï</span></div>
+    <h4>Pour lire un menu en chinois</h4>
+    <div class="lex">
+      <span class="ok">素 végétarien</span><span class="ok">青菜 légumes verts</span><span class="ok">豆腐 tofu</span><span class="ok">香菇 shiitake</span><span class="ok">菌 champignons</span><span class="ok">炒 sauté</span><span class="ok">饭 riz</span><span class="ok">面 nouilles</span><span class="ok">蛋 œuf</span>
+      <span class="no">肉 viande</span><span class="no">猪 porc</span><span class="no">鸡 poulet</span><span class="no">牛 bœuf</span><span class="no">鱼 poisson</span><span class="no">虾 crevette</span><span class="no">蚝油 sauce d'huître</span>
+    </div>
+  </div>
+  <div class="food">
+    <div><h4>Marché du matin, Mae Salong</h4><p>Lait de soja chaud, beignets chinois, nouilles. Vendredi, 7h. Demande « jay » pour une version sans viande.</p></div>
+    <div><h4>Yang Ming, Mae Salong</h4><p>100 % végétarien, cuisine maison, plat de champignons au gingembre. Plan B du jeudi. 8h – 20h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Yang+Ming&query_place_id=ChIJf3bZobLm1jARHIF32l_KOlI" target="_blank" rel="noopener">Maps ↗</a></div></div>
+    <div><h4>Maesai Vegetarian Foods</h4><p>Buffet végan familial, au centre de Mae Sai, si tu y passes. 25 à 30 ฿ par personne. 7h – 17h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Maesai+Vegetarian+foods&query_place_id=ChIJ_ZGpgXqL1jARO8tYs2oB4uw" target="_blank" rel="noopener">Maps ↗</a></div></div>
+    <div><h4>Chan Ka Pak, près de Mae Sai</h4><p>Légumes bio du potager, buffet de salades, légumes croustillants frits. 7h30 – 21h.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Chan+Ka+Pak&query_place_id=ChIJ3RULJxBg1jARQ30y9SMtzPk" target="_blank" rel="noopener">Maps ↗</a></div></div>
+    <div><h4>Kunda, Chiang Rai</h4><p>Burgers végans maison, sauces piquantes de Lena, la propriétaire. Dimanche soir. Mar – dim, 12h – 19h30, espèces uniquement.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Kunda+Vegetarian+Vegan+Burger+Cafe&query_place_id=ChIJ6c5ecyIH1zAR0Ah-y-LCrZQ" target="_blank" rel="noopener">Maps ↗</a></div></div>
+    <div><h4>Tamachat et Oasis, Chiang Rai</h4><p>Deux cantines 100 % véganes pour la suite. Tamachat ferme à 15h et le dimanche, Oasis le lundi.</p><div class="links"><a href="https://www.google.com/maps/search/?api=1&query=Tamachat+Vegetarian+Restaurant&query_place_id=ChIJN2c4J2wG1zARxSCK2zCCcaU" target="_blank" rel="noopener">Tamachat ↗</a><a href="https://www.google.com/maps/search/?api=1&query=Oasis+Vegetarian&query_place_id=ChIJG2TDfl0G1zAR_cScP3qvFyw" target="_blank" rel="noopener">Oasis ↗</a></div></div>
+  </div>
+</section>
+
+<section id="tips">
+  <h2>Les petits tips</h2>
+  <p class="sub">Tout ce qui ne rentre pas dans le programme, mais qui compte sur place.</p>
+  <div class="tips">
+    <details open><summary>Sur la route</summary><ul>
+      <li>Fais le plein dès que la jauge passe sous la moitié : peu de stations dans la montée vers Mae Salong.</li>
+      <li>Dans les descentes, utilise le frein arrière et le frein moteur, pas seulement l'avant.</li>
+      <li>Google Maps sous-estime les temps en montagne. Les durées de ce carnet sont prudentes.</li>
+      <li>Évite la route de nuit dans les montagnes : chiens, nids-de-poule, brouillard. Seule exception, le retour du belvédère samedi : roule doucement, phare allumé.</li>
+    </ul></details>
+    <details><summary>Dans les temples</summary><ul>
+      <li>Épaules et genoux couverts. Un paréo dans le top-case règle la question.</li>
+      <li>Chaussures retirées avant d'entrer dans les sanctuaires.</li>
+      <li>Ne pointe pas les pieds vers un bouddha quand tu t'assois.</li>
+    </ul></details>
+    <details><summary>À Mae Salong</summary><ul>
+      <li>Il fait plus frais qu'à Chiang Rai, surtout le soir et le matin : prends une polaire.</li>
+      <li>Les restaurants ferment tôt. Dîne vers 19h.</li>
+      <li>Dans les maisons de thé, la dégustation est gratuite et sans obligation d'achat. Si tu achètes, négocie un peu.</li>
+      <li>Au marché, les vendeurs viennent des villages voisins et ont peu de monnaie : garde des billets de 20 et 100 ฿.</li>
+    </ul></details>
+    <details><summary>Au Triangle d'Or</summary><ul>
+      <li>Les bateaux proposent souvent un arrêt sur une île-marché côté Laos. Pour rester en Thaïlande, choisis un tour sans arrêt.</li>
+      <li>Le Hall of Opium, prévu samedi à 10h, ouvre à 8h30, ferme à 16h et ne rouvre pas le lundi.</li>
+      <li>Les boutiques de souvenirs vendent du faux « opium tea » et des alcools aux serpents : passe ton chemin.</li>
+    </ul></details>
+    <details><summary>Ce qu'on a retiré, et pourquoi</summary><ul>
+      <li><b>Tham Luang</b> : les visites guidées à l'intérieur n'ont lieu que de novembre à avril. En octobre, tu verrais au mieux l'entrée.</li>
+      <li><b>Doi Chang</b> : direction opposée, et une expérience proche de Mae Salong.</li>
+      <li><b>Phu Chi Fa</b> : à l'est, une nuit de plus, et la mer de nuages est surtout fiable à partir de novembre.</li>
+      <li><b>Sukhothai</b> : à 4 ou 5 heures au sud. Une très belle étape, mais sur la route de Bangkok, pas dans cette boucle.</li>
+    </ul></details>
+  </div>
+</section>
+
+<footer>Carnet mis à jour le 14 octobre 2026. Horaires relevés en ligne : vérifie sur place, surtout pour le Hall of Opium.<br>Les liens Maps ont besoin de réseau. Sans réseau, télécharge avant de partir la zone de Chiang Rai dans Google Maps : ta photo de profil → Cartes hors connexion → Sélectionner une carte.</footer>
+</div>
+
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}</script>
+</body>
+</html>
