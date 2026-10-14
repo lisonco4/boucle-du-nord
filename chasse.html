@@ -135,7 +135,8 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 110px);max-width:560px;margi
 .when{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:22px 18px 20px;display:grid;gap:16px;
-  box-shadow:0 18px 40px -30px var(--shadow);position:relative;overflow:hidden;animation:rise .35s ease-out}
+  box-shadow:0 18px 40px -30px var(--shadow);position:relative;overflow:hidden}
+.card.in{animation:rise .35s ease-out}
 .card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
 .num{font-family:var(--display);font-size:3.2rem;font-weight:700;line-height:.9;color:var(--c);font-variant-numeric:tabular-nums}
 .qlbl{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
@@ -155,12 +156,13 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 110px);max-width:560px;margi
 .opt.dim{opacity:.45}
 .opts.answered .opt{cursor:default}
 .opts.answered .opt:active{transform:none}
-.verdict{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border-radius:16px;padding:12px 14px;font-size:.95rem;animation:rise .3s ease-out}
+.verdict{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border-radius:16px;padding:12px 14px;font-size:.95rem}
+.verdict.in,.place.in{animation:rise .35s ease-out}
 .verdict b{display:block;font-size:1rem}
 .verdict.ok{background:var(--okbg)}.verdict.ko{background:var(--kobg)}
 .verdict .gain{flex:none;display:inline-flex;align-items:center;gap:4px;font-weight:800;color:var(--leaf)}
 .verdict .gain svg{width:18px;height:18px}
-.place{display:grid;gap:4px;animation:rise .4s ease-out}
+.place{display:grid;gap:4px}
 .place .lbl{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
 .place h2{font-size:1.75rem}
 .place .th{color:var(--muted);font-size:1.05rem}
@@ -452,6 +454,7 @@ var S=fresh();
 try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 var V={tab:'map',focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
+var lastShown=null,fresh1=null; /* animare solo cio' che e' nuovo, non a ogni spunta */
 
 /* ---------- Calcoli ---------- */
 function ak(s,qi){return s.id+':'+qi;}
@@ -601,7 +604,7 @@ function renderTabs(){
   $('tabs').innerHTML=t.map(function(x){return '<button data-act="tab" data-tab="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'><span class="ic">'+ic(x[1])+
     (x[0]==='album'&&n?'<span class="badge">'+n+'</span>':'')+'</span>'+x[2]+'</button>';}).join('');
 }
-function renderMain(){var m=$('main');m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();hydrate(m);}
+function renderMain(){var m=$('main');if(V.tab!=='hunt')lastShown=null;m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();fresh1=null;hydrate(m);}
 
 function voucher(){
   var p=points(),l=lost(),w=won();
@@ -646,8 +649,8 @@ function quizBlock(s){
       h+='<button class="'+cls+'" data-act="answer" data-q="'+qi+'" data-k="'+k+'"'+(ans?' aria-disabled="true"':'')+'><span class="k">'+key+'</span><span>'+esc(o)+'</span></button>';
     });
     h+='</div>';
-    if(ans){h+=qRight(s,qi)?'<div class="verdict ok"><div><b>'+(q.all?'Giusto!':'Esatto!')+'</b>'+esc(q.f)+'</div><span class="gain">+3'+ic('leaf')+'</span></div>'
-                           :'<div class="verdict ko"><div><b>Era « '+esc(q.o[q.a])+' »</b>'+esc(q.f)+'</div></div>';}
+    if(ans){var nw=fresh1===ak(s,qi)?' in':'';h+=qRight(s,qi)?'<div class="verdict ok'+nw+'"><div><b>'+(q.all?'Giusto!':'Esatto!')+'</b>'+esc(q.f)+'</div><span class="gain">+3'+ic('leaf')+'</span></div>'
+                           :'<div class="verdict ko'+nw+'"><div><b>Era « '+esc(q.o[q.a])+' »</b>'+esc(q.f)+'</div></div>';}
     else show=false;
     h+='</div>';
   });
@@ -664,13 +667,14 @@ function huntView(){
       '<div class="locked"><span class="lock">?</span><h2>Tappa da scoprire</h2><p>Si apre quando hai convalidato la precedente. Se il programma cambia sul posto, puoi aprirla adesso.</p>'+
       '<button class="chipbtn" data-act="unlock">Aprila adesso</button></div></section>'+nav;
   }
-  h+='<section class="card" style="--c:'+c+'">';
+  var anim=lastShown!==s.id;lastShown=s.id;
+  h+='<section class="card'+(anim?' in':'')+'" style="--c:'+c+'">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span class="when"><span class="dot"></span>'+esc(s.when)+(s.km?' · '+s.km+' km':'')+'</span><span class="num">'+String(i).padStart(2,'0')+'</span></div>';
   h+=quizBlock(s);
   if(!answered(s)){
     h+='<div class="mystery"><span class="qm">?</span>'+(s.check?'Rispondi per scoprire la sfida di stasera':'Rispondi per scoprire il luogo e la sfida foto')+'</div>';
   }else{
-    h+='<div class="place"><span class="lbl">'+(s.check?'La sfida di stasera':'Il luogo')+'</span><h2>'+esc(s.place)+'</h2>'+(s.th?'<span class="th">'+s.th+'</span>':'')+'<p>'+esc(s.about)+'</p></div>';
+    h+='<div class="place'+(fresh1&&fresh1.indexOf(s.id+':')===0?' in':'')+'"><span class="lbl">'+(s.check?'La sfida di stasera':'Il luogo')+'</span><h2>'+esc(s.place)+'</h2>'+(s.th?'<span class="th">'+s.th+'</span>':'')+'<p>'+esc(s.about)+'</p></div>';
     if(s.maps)h+='<div><a class="chipbtn" href="'+esc(s.maps)+'" target="_blank" rel="noopener">'+ic('pin')+'Apri in Maps</a></div>';
     if(s.check){
       h+='<div class="checklist" id="checklist"><div class="head"><b>Gli indispensabili</b><span>'+checkCount(s)+' / '+s.check.length+'</span></div>';
@@ -752,7 +756,7 @@ document.addEventListener('click',function(e){
   switch(a){
     case 'tab':V.tab=b.getAttribute('data-tab');V.confirmReset=false;render();scrollTo(0,0);break;
     case 'answer':var qi=+b.getAttribute('data-q');if(qAnswered(s,qi))return;
-      S.answer[ak(s,qi)]=+b.getAttribute('data-k');save();var y=scrollY;render();scrollTo(0,y);
+      S.answer[ak(s,qi)]=+b.getAttribute('data-k');save();fresh1=ak(s,qi);var y=scrollY;render();scrollTo(0,y);
       if(qRight(s,qi)){bump();buzz(25);}else buzz([40,60,40]);break;
     case 'photo':pickFor=s.id;$('file').value='';$('file').click();break;
     case 'validate':validate(i);break;
