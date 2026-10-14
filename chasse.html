@@ -1,24 +1,25 @@
 <!doctype html>
-<html lang="fr">
+<html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>La chasse d'Ugo</title>
+<title>La caccia di Ugo</title>
 <meta name="theme-color" content="#FAF3E0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#17131A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="chasse.webmanifest">
 <link rel="apple-touch-icon" href="icons/chasse-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Chasse d'Ugo">
+<meta name="apple-mobile-web-app-title" content="Caccia di Ugo">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-/* Layout : app mobile. Barre du haut (étape + score), une étape à la fois en plein écran,
-   bouton d'action contextuel dans la zone du pouce, barre d'onglets en bas. */
+/* Layout : app mobile. Mappa disegnata come home, una tappa alla volta, bottone d'azione nella zona del pollice,
+   barra delle schede in basso. Punti = foglie di tè che riempiono una tazza, timbri da passaporto. */
 :root{
   --bg:#FAF3E0; --surface:#FFFDF8; --surface2:#F3EAD3; --ink:#1F1A17; --muted:#6B6157; --line:#E8DCC2;
-  --accent:#D6457F; --accent-ink:#FFFFFF; --blush:#FBC9DC; --gold:#D99A1E; --shadow:rgba(80,50,20,.18);
+  --accent:#D6457F; --accent-ink:#FFFFFF; --blush:#FBC9DC; --gold:#D99A1E; --leaf:#5E9A4F; --tea:#C98A3A;
+  --ok:#3F8A43; --okbg:#DDEFD6; --ko:#C2413A; --kobg:#F8DAD5; --river:#CFE0F1; --paper:#FFF8E8; --shadow:rgba(80,50,20,.18);
   --d1:#F386AE; --d2:#9C87BC; --d3:#6F98C8; --d4:#7FA477;
   --display:"Fraunces", Georgia, "Times New Roman", serif;
   --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -27,11 +28,13 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#17131A; --surface:#221C24; --surface2:#2C2530; --ink:#F6EEE6; --muted:#B3A79F; --line:#3A3140;
-  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --shadow:rgba(0,0,0,.5);
+  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --leaf:#8CCB7E; --tea:#E0A85A;
+  --ok:#8CCB86; --okbg:#21362A; --ko:#F08A80; --kobg:#3E2226; --river:#2B3A4C; --paper:#241E26; --shadow:rgba(0,0,0,.5);
   --d1:#F59BBE; --d2:#B6A3D6; --d3:#8DB2DD; --d4:#9CC293; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#17131A; --surface:#221C24; --surface2:#2C2530; --ink:#F6EEE6; --muted:#B3A79F; --line:#3A3140;
-  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --shadow:rgba(0,0,0,.5);
+  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --leaf:#8CCB7E; --tea:#E0A85A;
+  --ok:#8CCB86; --okbg:#21362A; --ko:#F08A80; --kobg:#3E2226; --river:#2B3A4C; --paper:#241E26; --shadow:rgba(0,0,0,.5);
   --d1:#F59BBE; --d2:#B6A3D6; --d3:#8DB2DD; --d4:#9CC293; color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -42,20 +45,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font
 h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
 p{margin:0}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation}
-button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:12px}
+button:focus-visible,a:focus-visible,g[data-act]:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:12px}
 svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Barre du haut */
+/* Barra in alto */
 .top{position:sticky;top:var(--st);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:10px 16px 8px;display:grid;gap:8px}
 .top .bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.top .title{font-family:var(--display);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:8px;min-width:0}
-.top .title small{font-family:var(--body);font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
-.score{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;
-  padding:6px 12px 6px 8px;font-weight:800;font-variant-numeric:tabular-nums;font-size:.95rem}
-.score .star{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;display:grid;place-items:center}
-.score .star svg{width:13px;height:13px;stroke-width:2.6}
-.score.bump{animation:bump .5s ease}
+.top .title{font-family:var(--display);font-weight:700;font-size:1.15rem;display:flex;align-items:baseline;gap:8px;min-width:0}
+.top .title small{font-family:var(--body);font-size:.78rem;font-weight:700;color:var(--muted)}
+.leaves{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:5px 12px 5px 6px;font-weight:800;font-variant-numeric:tabular-nums;font-size:.95rem}
+.leaves .lf{width:24px;height:24px;border-radius:50%;background:var(--leaf);display:grid;place-items:center}
+.leaves .lf svg{width:15px;height:15px;color:#fff;stroke-width:2.2}
+.leaves.bump{animation:bump .5s ease}
 .seg{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
 .seg i{height:5px;border-radius:3px;background:var(--line)}
 .seg i.done{background:var(--c)}
@@ -64,41 +67,84 @@ svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
 main{padding:6px 16px calc(var(--tab) + var(--sb) + 104px);max-width:560px;margin:0 auto}
 
-/* Étape en plein écran */
+/* Mappa */
+.maphead{display:grid;gap:4px;padding:8px 2px 12px}
+.maphead h1{font-size:2.1rem;color:var(--accent)}
+.maphead h1 em{font-weight:400;color:var(--ink)}
+.maphead p{color:var(--muted);font-weight:600;font-size:.92rem}
+.map{background:var(--paper);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 18px 40px -30px var(--shadow)}
+.map svg{display:block;width:100%;height:auto}
+.map text{font-family:var(--body);fill:var(--muted)}
+.map .lab{font-family:var(--display);font-weight:600;fill:var(--ink);font-size:15px;paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+.map g[data-act]{cursor:pointer}
+.map .pulse{animation:pulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px 14px;font-size:.78rem;font-weight:700;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+/* Tazza e timbri */
+.sect{margin-top:22px;display:grid;gap:12px}
+.sect h2{font-size:1.35rem;padding-inline:2px}
+.cupbox{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 16px}
+.cupbox svg{width:96px;height:96px}
+.cupbox .lvl{font-family:var(--display);font-size:1.3rem;font-weight:700;line-height:1.15}
+.cupbox .sub{font-size:.86rem;color:var(--muted);font-weight:600}
+.meter{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;background:var(--leaf);border-radius:4px;transition:width .6s ease}
+.howpts{color:var(--muted);font-size:.86rem;font-weight:600;padding-inline:2px}
+.steam path{animation:steam 2.4s ease-in-out infinite}
+.steam path:nth-child(2){animation-delay:.6s}.steam path:nth-child(3){animation-delay:1.2s}
+.stamps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stamp{display:grid;justify-items:center;gap:6px;text-align:center;font-size:.7rem;font-weight:700;line-height:1.2;color:var(--muted)}
+.stamp .s{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line);color:var(--line)}
+.stamp .s svg{width:28px;height:28px}
+.stamp.on{color:var(--ink)}
+.stamp.on .s{border:3px double var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);transform:rotate(-9deg)}
+
+/* Tappa */
 .when{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:20px 18px;display:grid;gap:16px;
   box-shadow:0 18px 40px -30px var(--shadow);position:relative;overflow:hidden;animation:rise .35s ease-out}
 .card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
 .num{font-family:var(--display);font-size:3.2rem;font-weight:700;line-height:.9;color:var(--c);font-variant-numeric:tabular-nums}
-.riddle{font-family:var(--display);font-style:italic;font-weight:400;font-size:1.42rem;line-height:1.38;color:var(--ink)}
-.hint{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border-radius:16px;padding:12px 14px;font-size:.95rem}
-.hint svg{color:var(--gold);margin-top:1px}
+.qlbl{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.qlbl svg{width:16px;height:16px}
+.q{font-family:var(--display);font-size:1.4rem;line-height:1.28;font-weight:600}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border-radius:16px;text-align:left;
+  background:var(--surface2);border:2px solid transparent;font-weight:700;font-size:1rem;line-height:1.3;transition:transform .12s ease}
+.opt:active{transform:scale(.98)}
+.opt .k{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--surface);font-size:.85rem;font-weight:800;color:var(--muted)}
+.opt .k svg{width:18px;height:18px;stroke-width:2.6}
+.opt.right{background:var(--okbg);border-color:var(--ok)}
+.opt.right .k{background:var(--ok);color:#fff}
+.opt.wrong{background:var(--kobg);border-color:var(--ko)}
+.opt.wrong .k{background:var(--ko);color:#fff}
+.opt.dim{opacity:.45}
+.opts.answered .opt{cursor:default}
+.opts.answered .opt:active{transform:none}
+.verdict{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border-radius:16px;padding:12px 14px;font-size:.95rem;animation:rise .3s ease-out}
+.verdict b{display:block;font-size:1rem}
+.verdict.ok{background:var(--okbg)}.verdict.ko{background:var(--kobg)}
+.verdict .gain{flex:none;display:inline-flex;align-items:center;gap:4px;font-weight:800;color:var(--leaf)}
+.verdict .gain svg{width:18px;height:18px}
+
+.place{display:grid;gap:6px;animation:rise .4s ease-out}
+.place .lbl{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.place h2{font-size:1.75rem}
+.place p{color:var(--muted);font-size:.98rem}
 .chipbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:var(--surface2);font-weight:700;font-size:.92rem}
 .chipbtn svg{width:18px;height:18px}
 a.chipbtn{color:var(--ink);text-decoration:none}
-
-.place{display:grid;gap:6px}
-.place .lbl{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
-.place h2{font-size:1.85rem;color:var(--ink)}
-.place p{color:var(--muted);font-size:.98rem}
-.place.veiled h2{filter:blur(11px);user-select:none}
-.place.veiled p{filter:blur(6px);user-select:none}
-.place.shown h2{animation:unveil .6s ease-out}
-.links{display:flex;flex-wrap:wrap;gap:8px}
-
-.guess{display:grid;gap:10px;background:var(--surface2);border-radius:18px;padding:14px}
-.guess b{font-size:.98rem}
-.guess .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.guess button{min-height:48px;border-radius:14px;font-weight:800;background:var(--surface);border:1px solid var(--line)}
-.guess button.yes{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.guessed{font-size:.88rem;font-weight:700;color:var(--muted)}
+.mystery{display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:16px;padding:12px 14px;color:var(--muted);font-weight:700;font-size:.92rem}
+.mystery .qm{width:36px;height:36px;border-radius:50%;border:2px dashed var(--muted);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.1rem;flex:none}
 
 .mission{display:grid;gap:12px;border-radius:20px;padding:16px;background:var(--blush)}
 .mission .lbl{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
 .mission .lbl svg{width:16px;height:16px}
 .mission p{font-weight:700;font-size:1.08rem;line-height:1.35}
-.shot{display:grid;place-items:center;gap:8px;min-height:170px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+.shot{display:grid;place-items:center;gap:8px;min-height:160px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
   background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--accent);font-weight:800;text-align:center;padding:16px;width:100%}
 .shot svg{width:40px;height:40px;stroke-width:1.6}
 .shot small{display:block;font-weight:600;color:var(--muted);font-size:.82rem}
@@ -108,7 +154,8 @@ a.chipbtn{color:var(--ink);text-decoration:none}
   background:rgba(20,15,12,.6);color:#fff;font-weight:700;font-size:.85rem;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .pic button svg{width:18px;height:18px}
 .saving{font-size:.88rem;color:var(--muted);font-weight:600}
-.err{font-size:.9rem;color:var(--accent);font-weight:700}
+.err{font-size:.9rem;color:var(--ko);font-weight:700}
+.note{font-size:.88rem;font-weight:700;color:var(--muted)}
 
 .minor{display:flex;justify-content:center;padding-top:4px}
 .minor button{min-height:44px;padding:0 10px;color:var(--muted);font-size:.88rem;font-weight:600;text-decoration:underline;text-underline-offset:3px}
@@ -116,78 +163,50 @@ a.chipbtn{color:var(--ink);text-decoration:none}
 .confirm .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .confirm button{min-height:46px;border-radius:12px;font-weight:800;background:var(--surface);border:1px solid var(--line)}
 .confirm button.danger{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-
 .nav{display:flex;justify-content:space-between;margin-top:14px}
 .nav button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:999px;color:var(--muted);font-weight:700;font-size:.88rem}
 .nav button:disabled{opacity:.3}
-
 .locked{display:grid;gap:14px;justify-items:center;text-align:center;padding:30px 10px}
-.locked .lock{width:72px;height:72px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;color:var(--muted)}
-.locked .lock svg{width:32px;height:32px}
+.locked .lock{width:72px;height:72px;border-radius:50%;border:2px dashed var(--muted);display:grid;place-items:center;color:var(--muted);font-family:var(--display);font-size:2rem;font-weight:700}
 .locked p{color:var(--muted)}
 
-/* Bouton d'action, zone du pouce */
-.cta{position:fixed;left:0;right:0;bottom:calc(var(--tab) + var(--sb));z-index:11;padding:10px 16px 12px;
-  background:linear-gradient(to top,var(--bg) 70%,transparent)}
+/* Bottone d'azione */
+.cta{position:fixed;left:0;right:0;bottom:calc(var(--tab) + var(--sb));z-index:11;padding:10px 16px 12px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
 .cta .in{max-width:560px;margin:0 auto}
 .primary{width:100%;min-height:58px;border-radius:18px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:1.05rem;
-  display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px -14px var(--accent);position:relative;overflow:hidden;
-  transition:transform .12s ease;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+  display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px -14px var(--accent);transition:transform .12s ease;-webkit-user-select:none;user-select:none}
 .primary:active{transform:scale(.98)}
 .primary.alt{background:var(--ink);color:var(--bg);box-shadow:none}
-.primary .fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--p,0));background:rgba(255,255,255,.28)}
-.primary span,.primary svg{position:relative}
-.primary .pts{font-size:.85rem;font-weight:800;background:rgba(255,255,255,.22);border-radius:999px;padding:2px 9px}
+.primary .pts{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;font-weight:800;background:rgba(255,255,255,.22);border-radius:999px;padding:2px 9px}
+.primary .pts svg{width:15px;height:15px}
 
-/* Onglets */
+/* Schede */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:12;height:calc(var(--tab) + var(--sb));padding-bottom:var(--sb);
   background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
   border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
 .tabs button{display:grid;justify-items:center;align-content:center;gap:3px;font-size:.72rem;font-weight:700;color:var(--muted)}
 .tabs button[aria-current="page"]{color:var(--accent)}
-.tabs .badge{position:absolute;margin-left:22px;margin-top:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:.68rem;display:grid;place-items:center;padding:0 5px}
 .tabs .ic{position:relative;display:grid;place-items:center}
-
-/* Parcours */
-.dayh{display:flex;align-items:center;gap:10px;margin:22px 4px 10px}
-.dayh h2{font-size:1.25rem}
-.dayh small{color:var(--muted);font-weight:700;font-size:.8rem;margin-left:auto;font-variant-numeric:tabular-nums}
-.list{display:grid;gap:8px;list-style:none;padding:0;margin:0}
-.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 12px;min-height:66px}
-.row .b{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:.85rem;border:2px solid var(--c);font-variant-numeric:tabular-nums}
-.row.done .b{background:var(--c);color:#fff;border-color:var(--c)}
-.row.here{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
-.row .t{display:grid;min-width:0;flex:1}
-.row .t b{font-family:var(--display);font-weight:600;font-size:1.05rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .t span{font-size:.78rem;color:var(--muted);font-weight:700}
-.row.lock .t b{color:var(--muted);font-style:italic;font-weight:400}
-.row img{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none}
-.row .go{color:var(--muted)}
-.hero{display:grid;gap:8px;padding:12px 4px 4px}
-.hero h1{font-size:2.2rem;color:var(--accent)}
-.hero h1 em{font-weight:400;color:var(--ink)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:2px}
-.stat b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1}
-.stat span{font-size:.75rem;color:var(--muted);font-weight:700}
+.tabs .badge{position:absolute;left:16px;top:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:.68rem;display:grid;place-items:center;padding:0 5px}
 
 /* Album */
+.hero{display:grid;gap:8px;padding:12px 4px 4px}
+.hero h1{font-size:2.1rem;color:var(--accent)}
+.hero h1 em{font-weight:400;color:var(--ink)}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
 .grid button{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;background:var(--surface2)}
 .grid button:nth-child(3n+1){aspect-ratio:1}
 .grid img{width:100%;height:100%;object-fit:cover;display:block}
-.grid .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;
-  font-size:.78rem;font-weight:700;text-align:left;line-height:1.25}
+.grid .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:.78rem;font-weight:700;text-align:left;line-height:1.25}
 .empty{display:grid;gap:10px;justify-items:center;text-align:center;padding:50px 20px;color:var(--muted)}
 .empty svg{width:44px;height:44px;stroke-width:1.5}
-.treasure{border-radius:26px;padding:26px 20px;display:grid;gap:10px;text-align:center;background:var(--ink);color:var(--bg);margin-top:8px}
-.treasure h2{font-size:2.2rem;color:var(--gold)}
-.treasure p{opacity:.9}
-.sign{font-family:var(--display);font-style:italic}
+.treasure{border-radius:26px;padding:26px 20px;display:grid;gap:10px;text-align:center;background:var(--surface);border:1px solid var(--line)}
+.treasure h2{font-size:2.2rem;color:var(--accent)}
+.treasure svg.cup{width:120px;height:120px}
+.sign{font-family:var(--display);font-style:italic;color:var(--accent)}
 
-/* Visionneuse */
-.viewer{position:fixed;inset:0;z-index:30;background:#0d0a0c;color:#fff;display:grid;grid-template-rows:auto 1fr auto;
-  padding:calc(var(--st) + 8px) 12px calc(var(--sb) + 12px)}
+/* Visore */
+.viewer{position:fixed;inset:0;z-index:30;background:#0d0a0c;color:#fff;display:grid;grid-template-rows:auto 1fr auto;padding:calc(var(--st) + 8px) 12px calc(var(--sb) + 12px)}
 .viewer .vt{display:flex;justify-content:space-between;align-items:center}
 .viewer .vt button,.viewer .vb button{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:0 14px;background:rgba(255,255,255,.12);font-weight:700;font-size:.9rem}
 .viewer .stage{display:grid;place-items:center;min-height:0;touch-action:pan-y}
@@ -197,39 +216,41 @@ a.chipbtn{color:var(--ink);text-decoration:none}
 .viewer .vb span{font-size:.8rem;opacity:.7}
 .viewer .vb .acts{display:flex;justify-content:center;gap:8px}
 
-/* Fête */
-.party{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  display:grid;place-items:center;padding:24px}
+/* Festa */
+.party{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:grid;place-items:center;padding:24px}
 .party canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
-.party .box{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:28px 22px 20px;display:grid;gap:12px;justify-items:center;text-align:center;
+.party .box{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:22px 22px 20px;display:grid;gap:12px;justify-items:center;text-align:center;
   max-width:360px;width:100%;box-shadow:0 30px 60px -30px var(--shadow);animation:popin .45s cubic-bezier(.2,1.4,.4,1)}
-.party .ok{width:76px;height:76px;border-radius:50%;background:var(--c,var(--accent));color:#fff;display:grid;place-items:center}
-.party .ok svg{width:40px;height:40px;stroke-width:3}
-.party h2{font-size:1.7rem}
-.party .gain{font-family:var(--display);font-size:2.6rem;font-weight:700;color:var(--gold);line-height:1}
+.party .box svg.cup{width:110px;height:110px}
+.party h2{font-size:1.6rem}
+.party .gain{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:2.3rem;font-weight:700;color:var(--leaf);line-height:1}
+.party .gain svg{width:30px;height:30px}
 .party .rk{font-weight:800;background:var(--blush);border-radius:999px;padding:6px 14px;font-size:.9rem}
-.party .primary{margin-top:6px}
+.party .newstamp{display:flex;align-items:center;gap:10px;font-weight:800;font-size:.92rem}
+.party .newstamp .s{width:44px;height:44px;border-radius:50%;border:3px double var(--c);color:var(--c);display:grid;place-items:center;transform:rotate(-9deg)}
+.party .newstamp .s svg{width:22px;height:22px}
 
-/* Accueil et installation */
-.welcome{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;align-content:center;gap:22px;padding:calc(var(--st) + 24px) 24px calc(var(--sb) + 24px);overflow:auto}
+/* Benvenuto e installazione */
+.welcome{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;align-content:center;gap:20px;padding:calc(var(--st) + 24px) 24px calc(var(--sb) + 24px);overflow:auto}
 .welcome .k{font-size:.75rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
 .welcome h1{font-size:clamp(2.8rem,14vw,4rem);font-weight:700;color:var(--accent);line-height:.95}
 .welcome h1 em{display:block;font-weight:400;color:var(--ink)}
-.rules{display:grid;gap:12px;list-style:none;padding:0;margin:0}
-.rules li{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;font-weight:600;font-size:.98rem}
+.rules{display:grid;gap:10px;list-style:none;padding:0;margin:0}
+.rules li{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:11px 14px;font-weight:600;font-size:.96rem}
 .rules .ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--blush);color:var(--accent)}
+.rules .ri.g{background:var(--okbg);color:var(--leaf)}
 .sheet{position:fixed;left:10px;right:10px;bottom:calc(var(--tab) + var(--sb) + 84px);z-index:35;background:var(--ink);color:var(--bg);border-radius:20px;padding:16px;
   display:grid;gap:10px;box-shadow:0 20px 40px -20px var(--shadow);animation:rise .35s ease-out;max-width:540px;margin:0 auto}
-.sheet b{font-size:1rem}
 .sheet p{font-size:.92rem;opacity:.9}
 .sheet button{justify-self:end;min-height:44px;padding:0 18px;border-radius:999px;background:var(--bg);color:var(--ink);font-weight:800}
-.toast{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translateX(-50%);z-index:45;background:var(--ink);color:var(--bg);border-radius:999px;padding:10px 18px;font-weight:700;font-size:.9rem;animation:rise .3s ease-out}
+.toast{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translateX(-50%);z-index:45;background:var(--ink);color:var(--bg);border-radius:999px;padding:10px 18px;font-weight:700;font-size:.9rem;animation:rise .3s ease-out;white-space:nowrap}
 input[type=file]{position:fixed;left:-9999px;width:1px;height:1px;opacity:0}
 
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes unveil{from{filter:blur(11px);opacity:.4}to{filter:none;opacity:1}}
 @keyframes popin{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
 @keyframes bump{40%{transform:scale(1.15)}}
+@keyframes pulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+@keyframes steam{0%,100%{opacity:0;transform:translateY(4px)}50%{opacity:.8;transform:translateY(-3px)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -237,127 +258,148 @@ input[type=file]{position:fixed;left:-9999px;width:1px;height:1px;opacity:0}
 <header class="top" id="top"></header>
 <main id="main"></main>
 <div class="cta" id="cta"></div>
-<nav class="tabs" id="tabs" aria-label="Navigation"></nav>
+<nav class="tabs" id="tabs" aria-label="Navigazione"></nav>
 <input type="file" id="file" accept="image/*">
 <div id="layer"></div>
 
 <script>
-/* ---------- Données ---------- */
+/* ---------- Tappe : domanda a scelta multipla (a = indice della risposta giusta) ---------- */
 var STEPS=[
- {id:'lalitta',day:1,when:'Jeudi 15 · 9h30',
-  riddle:"Une forêt de légende, des ponts de pierre et de l'eau qui tombe de partout. Ici, le ticket d'entrée se boit.",
-  hint:"Premier arrêt, à 15 minutes de Chiang Rai. On y prend le petit-déjeuner.",
-  place:'Lalitta Café',about:"Un café-jardin inspiré de la forêt mythique d'Himmapan. L'entrée de 60 ฿ est convertie en boisson.",
-  mission:'Vous deux devant une cascade.',maps:'https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai'},
- {id:'patueng',day:1,when:'Jeudi 15 · 11h45',
-  riddle:"La terre souffle de la vapeur et crache de l'eau à dix mètres de haut. On y trempe les pieds, et certains y cuisent leurs œufs.",
-  hint:"Sur la route plate avant la montée, près de Mae Chan. Ça sent un peu le soufre.",
-  place:'Pa Tueng Hot Springs',about:"Un geyser dans un petit parc, et des bassins gratuits où les habitants trempent leurs pieds.",
-  mission:'Vos quatre pieds dans le même bassin.',maps:'https://www.google.com/maps/search/?api=1&query=Pa+Tueng+Hot+Springs&query_place_id=ChIJG_i8gDr81jAROG8mZbGQzWU'},
- {id:'xinshidai',day:1,when:'Jeudi 15 · 13h30',
-  riddle:"Une boulangerie de plus de 50 ans perchée au milieu des théiers. Tout est fait au vrai beurre, et il faut garder de la place pour un roulé.",
-  hint:"Après 30 minutes de montée raide. Le déjeuner du premier jour.",
-  place:'Xin Shi Dai Bakery',about:"Une boulangerie-café familiale de Mae Salong, en contrebas de la rue principale. Pizza yunnanaise, tempura, onion rings.",
-  mission:'Le roulé à la vanille, juste avant la première bouchée.',maps:'https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI'},
- {id:'maesalong',day:1,when:'Jeudi 15 · 15h30',
-  riddle:"Des soldats chinois sont montés ici après 1949. Leurs enfants ont remplacé le pavot par une feuille qu'on sert dans des tasses minuscules, et la dégustation est gratuite.",
-  hint:"Le village où on dort ce soir. Un musée, un tombeau de général, et une rue entière de maisons de thé.",
-  place:'Le village de Mae Salong',about:"Le musée des Martyrs chinois, le tombeau du général Tuan et la rue des maisons de thé, où l'oolong se goûte sans obligation d'achat.",
-  mission:"Trinquez avec deux tasses d'oolong.",maps:'https://www.google.com/maps/search/?api=1&query=Chinese+Martyrs+Memorial+Museum+Mae+Salong'},
- {id:'sunset1',day:1,when:'Jeudi 15 · 17h15',
-  riddle:"Vers 17h50, les rangs verts deviennent dorés. Deux choix : une terrasse fleurie au-dessus des plantations, ou un balcon d'où l'on voit des lucioles.",
-  hint:"Le premier coucher de soleil du voyage, en montagne.",
-  place:'Coucher de soleil sur les théiers',about:"Mae Salong Flower Hills, ou le balcon de Twins Farm. Éteins la lumière à la nuit tombée pour voir les lucioles.",
-  mission:'Vos deux silhouettes devant le soleil couchant.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag'},
- {id:'marche',day:2,when:'Vendredi 16 · 7h',
-  riddle:"Avant 8h, les Akha descendent des montagnes avec des herbes, des champignons et du thé. Le petit-déjeuner se prend debout : un lait chaud et un beignet.",
-  hint:"Réveil tôt. Derrière Shin Sane, en montant à gauche après le 7-Eleven.",
-  place:'Le marché du matin',about:"Le marché des habitants de Mae Salong. Demande « jay » pour une version sans viande.",
-  mission:'Le lait de soja et les beignets, tenus par vos deux mains.',maps:'https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok'},
- {id:'triangle',day:2,when:'Vendredi 16 · 15h35',
-  riddle:"Trois pays se regardent par-dessus l'eau, là où une rivière rejoint un très grand fleuve. Un grand bouddha doré les surveille.",
-  hint:"5 minutes au nord de l'hôtel, juste après ton rendez-vous de 14h.",
-  place:"Le Triangle d'Or",about:"À Sop Ruak, la Ruak rejoint le Mékong : Thaïlande, Laos et Birmanie se font face.",
-  mission:'Les trois pays dans une seule photo, avec vous deux devant.',maps:'https://www.google.com/maps/search/?api=1&query=Golden+Triangle+Park+Sop+Ruak'},
- {id:'chiangsaen',day:2,when:'Vendredi 16 · 16h10',
-  riddle:"Une ancienne capitale du royaume du Lanna. Les temples en brique sont mangés par les arbres, et le plus beau se cache dans une forêt de tecks. Il ferme à 17h.",
-  hint:"La vieille ville, 15 minutes au sud du Triangle d'Or.",
-  place:'Wat Pa Sak, Chiang Saen',about:"Wat Pa Sak, le chedi de 58 m de Wat Phra That Chedi Luang, et Chom Kitti sur sa colline.",
-  mission:"Une photo où un arbre a l'air plus vieux que le temple.",maps:'https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen'},
- {id:'mekong',day:2,when:'Vendredi 16 · 17h25',
-  riddle:"Le soleil se couche dans votre dos, et pourtant c'est au-dessus d'un autre pays que le ciel devient rose.",
-  hint:"Devant l'hôtel, au bord du fleuve. Le Laos est en face.",
-  place:'Coucher de soleil sur le Mékong',about:"Depuis la rive devant View Khong, ou en terrasse au Golden Time voisin.",
-  mission:'Le ciel rose sur le Mékong, et vous deux dans le cadre.',maps:'https://www.google.com/maps/search/?api=1&query=View+Khong+Hotel+Chiang+Saen&query_place_id=ChIJRwg_3PFD1jARU9CsnZKqjAY'},
- {id:'opium',day:3,when:'Samedi 17 · 10h',
-  riddle:"On y entre par un long tunnel sombre, et on en ressort en sachant pourquoi le thé a remplacé le pavot dans ces montagnes.",
-  hint:"Un musée créé par une fondation royale, à 5 minutes de l'hôtel.",
-  place:'Hall of Opium',about:"Le meilleur musée du nord de la Thaïlande, sur l'histoire de la région que vous traversez. Compter 1h45.",
-  mission:"Vous deux à l'entrée du musée (à l'intérieur, les photos ne sont pas toujours permises).",maps:'https://www.google.com/maps/search/?api=1&query=Hall+of+Opium+Golden+Triangle+Park'},
- {id:'thampla',day:3,when:'Samedi 17 · 13h',
-  riddle:"Un temple rouge et or collé à la falaise, des poissons énormes dans une source claire, et des habitants poilus qui n'ont peur de personne.",
-  hint:"Sur la route de la frontière. Prends un bâton de bambou à l'entrée.",
-  place:'Wat Tham Pla',about:"La grotte aux singes : un lieu de culte local, avec une grotte-sanctuaire en haut des escaliers. Rien dans les mains, sac fermé.",
-  mission:'Un singe et vous deux dans la même photo, à bonne distance.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE'},
- {id:'chouifong',day:3,when:'Samedi 17 · 14h20',
-  riddle:"160 hectares de vagues vertes, plantées en 1977. On marche dans les rangs, puis on s'assoit derrière une grande vitre.",
-  hint:"Une plantation de thé près de Mae Chan. Les desserts au matcha ont la cote.",
-  place:'Choui Fong Tea',about:"Une des plus grandes plantations de thé du pays. Balade libre et café vitré face aux théiers.",
-  mission:'Un dessert au matcha, avec les théiers derrière.',maps:'https://www.google.com/maps/search/?api=1&query=Choui+Fong+Tea+Plantation&query_place_id=ChIJg_wdGB_51jARo1fdwwocqUg'},
- {id:'maesalongnai',day:3,when:'Samedi 17 · 17h15',
-  riddle:"Une crête avec une vue des deux côtés de la montagne. Presque personne n'y monte le soir, et c'est tant mieux.",
-  hint:"18 km de montée par la route 1130, depuis la villa.",
-  place:'Belvédère de Mae Salong Nai',about:"Le coucher de soleil le plus haut du voyage. Retour doucement, phare allumé, avec le dîner au Cave sur le chemin.",
-  mission:'Vous deux, et les montagnes des deux côtés.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Nai+Viewpoint&query_place_id=ChIJ06zaqvLl1jARxJ21tzkExdA'},
- {id:'doitung',day:4,when:'Dimanche 18 · 10h',
-  riddle:"Une princesse a remplacé le pavot par du café, de la macadamia et des fleurs. Sa maison ressemble à un chalet suisse.",
-  hint:"Le Hall of Opium raconte le début de l'histoire, ici on en voit la fin.",
-  place:'Doi Tung',about:"La villa de la princesse mère et les jardins de Mae Fah Luang, fleuris toute l'année. Café Doi Tung à goûter.",
-  mission:'Vous deux dans les jardins, avec le plus de fleurs possible.',maps:'https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ'},
- {id:'bigbuddha',day:4,when:'Dimanche 18 · 14h50',
-  riddle:"69 mètres, toute blanche, et on monte dans sa tête en ascenseur. Tout le monde l'appelle Big Buddha, mais c'est une déesse.",
-  hint:"Petit détour à l'entrée de Chiang Rai. Une pagode de neuf étages à côté.",
-  place:'Wat Huay Pla Kang',about:"La statue de Guanyin, déesse de la miséricorde. Ascenseur 40 ฿, épaules et genoux couverts.",
-  mission:'La vue depuis la tête, ou vous deux minuscules devant la statue.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Huay+Pla+Kang&query_place_id=ChIJE7rdqpsG1zAR64zTj5CGWiw'},
- {id:'retour',day:4,when:'Dimanche 18 · 16h15',
-  riddle:"Le scooter rentre à la maison. C'est le dernier soir du festival, et une cantine végane sert des burgers jusqu'à 19h30.",
-  hint:"La boucle est bouclée.",
-  place:'Retour à Chiang Rai',about:"On rend le scooter. Kunda est ouvert le dimanche jusqu'à 19h30, espèces uniquement.",
-  mission:'La photo de fin : vous deux et le scooter, ou vos burgers chez Kunda.',maps:'https://www.google.com/maps/search/?api=1&query=Kunda+Vegetarian+Vegan+Burger+Cafe&query_place_id=ChIJ6c5ecyIH1zAR0Ah-y-LCrZQ'}
+ {id:'lalitta',day:1,when:'Giovedì 15 · 9:30',x:258,y:568,lx:-18,ly:5,anc:'end',short:'Lalitta Café',
+  q:"Al Lalitta Café, in cosa si trasforma il biglietto d'ingresso da 60 ฿?",o:['In un dolce','In una bevanda','In una cartolina',"In un'offerta al tempio"],a:1,
+  f:"Il giardino è ispirato alla foresta mitica di Himmapan.",
+  place:'Lalitta Café',about:"Un caffè-giardino con cascate, ponti di pietra e sculture ovunque. Colazione in mezzo all'acqua.",
+  mission:'Voi due davanti a una cascata.',maps:'https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai'},
+ {id:'patueng',day:1,when:'Giovedì 15 · 11:45',x:247,y:390,lx:-18,ly:5,anc:'end',short:'Pa Tueng',
+  q:"Cosa cuoce la gente del posto nell'acqua più calda delle sorgenti di Pa Tueng?",o:['Il riso','Le pannocchie','Le uova','Il tè'],a:2,
+  f:"Il geyser spruzza l'acqua a una decina di metri d'altezza.",
+  place:'Pa Tueng Hot Springs',about:"Un geyser in un piccolo parco e vasche gratuite dove si immergono i piedi. Un po' di odore di zolfo.",
+  mission:'I vostri quattro piedi nella stessa vasca.',maps:'https://www.google.com/maps/search/?api=1&query=Pa+Tueng+Hot+Springs&query_place_id=ChIJG_i8gDr81jAROG8mZbGQzWU'},
+ {id:'xinshidai',day:1,when:'Giovedì 15 · 13:30',x:95,y:337,lx:0,ly:32,anc:'middle',short:'Xin Shi Dai',
+  q:"Da quanto tempo esiste la panetteria Xin Shi Dai di Mae Salong?",o:['Da più di 50 anni','Da 5 anni','Da 150 anni',"Dall'anno scorso"],a:0,
+  f:"Tutto è fatto in casa con burro vero.",
+  place:'Xin Shi Dai Bakery',about:"Panetteria di famiglia a Mae Salong. Pizza dello Yunnan, tempura, onion rings, e il rotolo alla vaniglia.",
+  mission:'Il rotolo alla vaniglia, prima del primo morso.',maps:'https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI'},
+ {id:'maesalong',day:1,when:'Giovedì 15 · 15:30',x:124,y:312,lx:18,ly:5,anc:'start',short:'Mae Salong',
+  q:"Chi ha fondato il villaggio di Mae Salong dopo il 1949?",o:['Monaci tibetani','Mercanti inglesi','Soldati cinesi nazionalisti','Pescatori del Mekong'],a:2,
+  f:"I loro figli hanno sostituito l'oppio con il tè oolong.",
+  place:'Il villaggio di Mae Salong',about:"Il museo dei Martiri cinesi, la tomba del generale Tuan e la via delle case del tè, dove la degustazione è gratis.",
+  mission:"Un brindisi con due tazzine di oolong.",maps:'https://www.google.com/maps/search/?api=1&query=Chinese+Martyrs+Memorial+Museum+Mae+Salong'},
+ {id:'sunset1',day:1,when:'Giovedì 15 · 17:15',x:70,y:318,lx:-18,ly:5,anc:'end',short:'Tramonto',
+  q:"A che ora tramonta il sole sulle piantagioni di Mae Salong a metà ottobre?",o:['Verso le 16:15','Verso le 17:50','Verso le 19:30','Verso le 20:45'],a:1,
+  f:"Al buio, spegnete la luce del balcone: si vedono le lucciole.",
+  place:'Tramonto sulle piantagioni',about:"Dalla terrazza di Mae Salong Flower Hills, oppure dal balcone di Twins Farm.",
+  mission:'Le vostre due silhouette davanti al tramonto.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag'},
+ {id:'marche',day:2,when:'Venerdì 16 · 7:00',x:100,y:270,lx:0,ly:-20,anc:'middle',short:'Mercato',
+  q:"Qual è la colazione tipica al mercato del mattino di Mae Salong?",o:['Cappuccino e cornetto','Latte di soia caldo e frittelle cinesi','Riso al mango','Pho vietnamita'],a:1,
+  f:"Il grosso del mercato succede prima delle 8.",
+  place:'Il mercato del mattino',about:"Gli Akha scendono dalle montagne con erbe, funghi e tè. Dite « jay » per la versione senza carne.",
+  mission:'Latte di soia e frittelle, tenuti dalle vostre mani.',maps:'https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok'},
+ {id:'triangle',day:2,when:'Venerdì 16 · 15:35',x:516,y:132,lx:0,ly:-20,anc:'middle',short:"Triangolo d'Oro",
+  q:"Quali paesi si guardano al Triangolo d'Oro?",o:['Thailandia, Cambogia, Vietnam','Thailandia, Laos, Cina','Thailandia, Laos, Myanmar','Thailandia, Myanmar, India'],a:2,
+  f:"Il fiume Ruak si getta nel Mekong proprio qui, a Sop Ruak.",
+  place:"Il Triangolo d'Oro",about:"Tre paesi uno di fronte all'altro, sotto un grande Buddha dorato in riva all'acqua. Restate a terra: le barche fanno tappa in Laos.",
+  mission:'I tre paesi in una sola foto, con voi due davanti.',maps:'https://www.google.com/maps/search/?api=1&query=Golden+Triangle+Park+Sop+Ruak'},
+ {id:'chiangsaen',day:2,when:'Venerdì 16 · 16:10',x:517,y:235,lx:18,ly:5,anc:'start',short:'Chiang Saen',
+  q:"Il tempio Wat Pa Sak di Chiang Saen si trova in mezzo a una foresta di…",o:['Bambù','Teak','Pini','Banani'],a:1,
+  f:"Chiang Saen è stata una capitale del regno Lanna. Wat Pa Sak chiude alle 17.",
+  place:'Wat Pa Sak, Chiang Saen',about:"Templi in mattoni avvolti dagli alberi, e il chedi di 58 metri di Wat Phra That Chedi Luang. Spalle e ginocchia coperte.",
+  mission:"Una foto in cui un albero sembra più vecchio del tempio.",maps:'https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen'},
+ {id:'mekong',day:2,when:'Venerdì 16 · 17:25',x:548,y:180,lx:18,ly:5,anc:'start',short:'Mekong',
+  q:"Davanti all'hotel, sull'altra riva del Mekong, quale paese c'è?",o:['Il Myanmar','La Cina','Il Laos','La Cambogia'],a:2,
+  f:"Il sole tramonta alle vostre spalle, ma il cielo diventa rosa sopra il Laos.",
+  place:'Tramonto sul Mekong',about:"Dalla riva davanti al View Khong Hotel, o in terrazza al Golden Time accanto.",
+  mission:"Il cielo rosa sul Mekong, con voi due nell'inquadratura.",maps:'https://www.google.com/maps/search/?api=1&query=View+Khong+Hotel+Chiang+Saen&query_place_id=ChIJRwg_3PFD1jARU9CsnZKqjAY'},
+ {id:'opium',day:3,when:'Sabato 17 · 10:00',x:490,y:170,lx:-18,ly:5,anc:'end',short:'Hall of Opium',
+  q:"Come si entra nel museo Hall of Opium?",o:['In barca','Da un lungo tunnel buio','Con un ascensore panoramico','Da una grotta con le scimmie'],a:1,
+  f:"Il museo spiega perché il tè e il caffè hanno sostituito il papavero in queste montagne.",
+  place:'Hall of Opium',about:"Il miglior museo del nord della Thailandia, creato da una fondazione reale. Calcolate 1h45.",
+  mission:"Voi due all'ingresso del museo (dentro le foto non sono sempre permesse).",maps:'https://www.google.com/maps/search/?api=1&query=Hall+of+Opium+Golden+Triangle+Park'},
+ {id:'thampla',day:3,when:'Sabato 17 · 13:00',x:306,y:181,lx:18,ly:5,anc:'start',short:'Tham Pla',
+  q:"All'ingresso di Wat Tham Pla, la grotta delle scimmie, cosa conviene prendere?",o:['Delle banane per le scimmie','Un ombrello','Un bastone di bambù','Un casco'],a:2,
+  f:"Si batte il bastone per terra se una scimmia insiste. Niente in mano, borsa chiusa, occhiali in tasca.",
+  place:'Wat Tham Pla',about:"Un tempio rosso e oro contro la falesia, una sorgente piena di pesci enormi e un santuario in cima alle scale.",
+  mission:'Una scimmia e voi due nella stessa foto, a distanza di sicurezza.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE'},
+ {id:'chouifong',day:3,when:'Sabato 17 · 14:20',x:263,y:310,lx:18,ly:5,anc:'start',short:'Choui Fong',
+  q:"In che anno è nata la piantagione di tè Choui Fong?",o:['1890','1955','1977','2005'],a:2,
+  f:"Oggi sono 160 ettari di terrazze a onde sulle colline.",
+  place:'Choui Fong Tea',about:"Passeggiata libera tra i filari, degustazione al negozio e caffè con vetrata sulle piantagioni. Famoso l'oolong all'osmanto.",
+  mission:'Un dolce al matcha, con le piantagioni dietro.',maps:'https://www.google.com/maps/search/?api=1&query=Choui+Fong+Tea+Plantation&query_place_id=ChIJg_wdGB_51jARo1fdwwocqUg'},
+ {id:'maesalongnai',day:3,when:'Sabato 17 · 17:15',x:190,y:262,lx:0,ly:-20,anc:'middle',short:'Mae Salong Nai',
+  q:"Cosa si vede dal belvedere di Mae Salong Nai?",o:['Il mare','Le montagne da entrambi i lati della cresta',"Il Triangolo d'Oro",'Bangkok in lontananza'],a:1,
+  f:"La sera non sale quasi nessuno: è il tramonto più alto del viaggio.",
+  place:'Belvedere di Mae Salong Nai',about:"18 km di salita sulla strada 1130. Al ritorno, piano e fanale acceso, con la cena al Cave lungo la strada.",
+  mission:'Voi due, con le montagne da entrambi i lati.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Nai+Viewpoint&query_place_id=ChIJ06zaqvLl1jARxJ21tzkExdA'},
+ {id:'doitung',day:4,when:'Domenica 18 · 10:00',x:256,y:222,lx:0,ly:-20,anc:'middle',short:'Doi Tung',
+  q:"Con cosa ha sostituito il papavero la principessa madre a Doi Tung?",o:['Riso e mais','Tabacco','Caffè, macadamia e artigianato','Vigneti'],a:2,
+  f:"La sua villa sembra uno chalet svizzero.",
+  place:'Doi Tung',about:"La villa reale e i giardini di Mae Fah Luang, tra i più belli del paese, fioriti tutto l'anno. Assaggiate il caffè Doi Tung.",
+  mission:'Voi due nei giardini, con più fiori possibile.',maps:'https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ'},
+ {id:'bigbuddha',day:4,when:'Domenica 18 · 14:50',x:306,y:574,lx:18,ly:5,anc:'start',short:'Big Buddha',
+  q:"Di che colore è la statua gigante di Wat Huay Pla Kang?",o:['Dorata','Bianca','Rossa','Verde giada'],a:1,
+  f:"Tutti la chiamano Big Buddha, ma è Guanyin, dea della misericordia: 69 metri, e un ascensore sale fino alla testa.",
+  place:'Wat Huay Pla Kang',about:"Ascensore 40 ฿, biglietti fino alle 18. Accanto, una pagoda di nove piani con scale a forma di drago.",
+  mission:'La vista dalla testa, oppure voi due minuscoli davanti alla statua.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Huay+Pla+Kang&query_place_id=ChIJE7rdqpsG1zAR64zTj5CGWiw'},
+ {id:'retour',day:4,when:'Domenica 18 · 16:15',x:285,y:606,lx:0,ly:32,anc:'middle',short:'Chiang Rai',
+  q:"Cosa si mangia da Kunda, l'ultima sera a Chiang Rai?",o:['Sushi','Pizza al forno a legna','Burger vegani','Kebab'],a:2,
+  f:"Ultima sera del festival vegetariano. Kunda è aperto fino alle 19:30, solo contanti.",
+  place:'Ritorno a Chiang Rai',about:"Si riconsegna lo scooter. Il giro è chiuso.",
+  mission:'La foto finale: voi due e lo scooter, o i vostri burger da Kunda.',maps:'https://www.google.com/maps/search/?api=1&query=Kunda+Vegetarian+Vegan+Burger+Cafe&query_place_id=ChIJ6c5ecyIH1zAR0Ah-y-LCrZQ'}
 ];
-var DAYS={1:'Jeudi 15',2:'Vendredi 16',3:'Samedi 17',4:'Dimanche 18'};
-var DAYNAME={1:'Vers Mae Salong',2:'Vers le Mékong',3:'La grotte et le thé',4:'Doi Tung et retour'};
 var DAYCOLOR={1:'var(--d1)',2:'var(--d2)',3:'var(--d3)',4:'var(--d4)'};
-var RANKS=[[0,'Passager du scooter'],[60,"Goûteur d'oolong"],[120,'Explorateur du Mékong'],[200,"Gardien du Triangle d'Or"],[280,'Légende de la Boucle du Nord']];
-var MAX=STEPS.length*20;
+var PTS={answer:3,photo:2,done:5};
+var MAX=STEPS.length*(PTS.answer+PTS.photo+PTS.done);
+var LEVELS=[[0,'Germoglio'],[25,'Foglia giovane'],[55,'Tazza di oolong'],[95,'Teiera fumante'],[135,'Maestro del tè']];
+var LETTERS=['A','B','C','D'];
 var IC={
- star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+ leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7"/>',
  cam:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.6"/>',
- check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
- bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0012 3z"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>',
  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
- eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.2-1.5 2.3M12 17h.01"/>',
  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>', left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
- lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+ map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
  compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
- route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/>',
  photos:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
  share:'<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/>',
- x:'<path d="M6 6l12 12M18 6L6 18"/>', swap:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
- gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v9h14v-9M12 8C10 4 6 4 6 6.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/>'
+ swap:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
+ gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v9h14v-9M12 8C10 4 6 4 6 6.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/>',
+ sun:'<circle cx="12" cy="14" r="4"/><path d="M12 4v3M4.9 7l2.1 2.1M19.1 7L17 9.1M2 18h20M6 21h12"/>',
+ monkey:'<circle cx="12" cy="13" r="6"/><circle cx="5" cy="10" r="2.2"/><circle cx="19" cy="10" r="2.2"/><path d="M9.5 15.5c1.5 1.2 3.5 1.2 5 0M10 12h.01M14 12h.01"/>',
+ dawn:'<path d="M3 18h18M7 18a5 5 0 0110 0M12 6v3M5.6 9.6l1.8 1.8M18.4 9.6l-1.8 1.8"/>',
+ brain:'<path d="M12 5a3 3 0 00-5.8 1A3 3 0 004 11a3 3 0 001.5 5.5A3 3 0 0011 18V5.5M12 5a3 3 0 015.8 1A3 3 0 0120 11a3 3 0 01-1.5 5.5A3 3 0 0113 18V5.5"/>',
+ tea:'<path d="M4 9h13v5a5 5 0 01-5 5H9a5 5 0 01-5-5zM17 11h1.5a2.5 2.5 0 010 5H16M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/>',
+ river:'<path d="M3 8c3-2 6 2 9 0s6 2 9 0M3 13c3-2 6 2 9 0s6 2 9 0M3 18c3-2 6 2 9 0s6 2 9 0"/>',
+ cave:'<path d="M3 20L9 6l3 5 2-3 7 12zM10 20a2.5 3 0 015 0"/>',
+ flower:'<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5a3 3 0 110-6 3 3 0 110 6zM12 14.5a3 3 0 110 6 3 3 0 110-6zM9.5 12a3 3 0 11-6 0 3 3 0 116 0zM14.5 12a3 3 0 116 0 3 3 0 11-6 0z"/>'
 };
 function ic(n,cls){return '<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
-/* ---------- État ---------- */
-var KEY='chasse-ugo-v1';
-function fresh(){return {revealed:{},hint:{},guessed:{},done:{},skipped:{},photo:{},opened:{},started:false,installSeen:false};}
+/* ---------- Stato ---------- */
+var KEY='caccia-ugo-v2';
+function fresh(){return {answer:{},done:{},skipped:{},photo:{},opened:{},started:false,installSeen:false};}
 var S=fresh();
 try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-var V={tab:'hunt',focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
+var V={tab:'map',focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
 
-/* ---------- Photos (IndexedDB, restent sur le téléphone) ---------- */
+/* ---------- Timbri del passaporto ---------- */
+function dayDone(d){return STEPS.every(function(s){return s.day!==d||S.done[s.id];});}
+function streak(){var best=0,cur=0;STEPS.forEach(function(s){if(S.answer[s.id]===undefined)return;if(S.answer[s.id]===s.a){cur++;best=Math.max(best,cur);}else cur=0;});return best;}
+var STAMPS=[
+ {id:'g1',name:'Mae Salong',how:'Finisci il giovedì',icon:'tea',c:'var(--d1)',ok:function(){return dayDone(1);}},
+ {id:'g2',name:'Mekong',how:'Finisci il venerdì',icon:'river',c:'var(--d2)',ok:function(){return dayDone(2);}},
+ {id:'g3',name:'Grotta e tè',how:'Finisci il sabato',icon:'cave',c:'var(--d3)',ok:function(){return dayDone(3);}},
+ {id:'g4',name:'Doi Tung',how:'Finisci la domenica',icon:'flower',c:'var(--d4)',ok:function(){return dayDone(4);}},
+ {id:'sun',name:'Re dei tramonti',how:'3 tramonti con foto',icon:'sun',c:'var(--gold)',ok:function(){return ['sunset1','mekong','maesalongnai'].every(function(k){return S.done[k]&&S.photo[k];});}},
+ {id:'monkey',name:'Amico delle scimmie',how:'Foto a Tham Pla',icon:'monkey',c:'var(--tea)',ok:function(){return !!(S.done.thampla&&S.photo.thampla);}},
+ {id:'dawn',name:'Mattiniero',how:'Il mercato delle 7',icon:'dawn',c:'var(--accent)',ok:function(){return !!S.done.marche;}},
+ {id:'brain',name:'Cervellone',how:'5 risposte giuste di fila',icon:'brain',c:'var(--leaf)',ok:function(){return streak()>=5;}}
+];
+function earned(){return STAMPS.filter(function(b){return b.ok();}).map(function(b){return b.id;});}
+
+/* ---------- Foto (IndexedDB, restano sul telefono) ---------- */
 var dbp=null;
 function idb(){if(dbp)return dbp;dbp=new Promise(function(res,rej){
   if(!window.indexedDB)return rej('no idb');var r=indexedDB.open('chasse-ugo',1);
@@ -372,9 +414,7 @@ function clearPhotos(){return idb().then(function(db){return new Promise(functio
 var urls={};
 function photoUrl(id){if(urls[id])return Promise.resolve(urls[id]);
   return getPhoto(id).then(function(b){if(!b)return null;urls[id]=URL.createObjectURL(b);return urls[id];});}
-/* remplit les <img data-photo="id"> après chaque rendu */
-function hydrate(root){root.querySelectorAll('img[data-photo]').forEach(function(im){
-  photoUrl(im.getAttribute('data-photo')).then(function(u){if(u)im.src=u;});});}
+function hydrate(root){root.querySelectorAll('img[data-photo]').forEach(function(im){photoUrl(im.getAttribute('data-photo')).then(function(u){if(u)im.src=u;});});}
 function loadImage(file){
   if(window.createImageBitmap)return createImageBitmap(file,{imageOrientation:'from-image'}).catch(function(){return viaImg(file);});
   return viaImg(file);}
@@ -386,193 +426,214 @@ function compress(file){return loadImage(file).then(function(img){
   return new Promise(function(res){c.toBlob(function(b){res(b||file);},'image/jpeg',0.85);});
 }).catch(function(){return file;});}
 
-/* ---------- Calculs ---------- */
+/* ---------- Calcoli ---------- */
+function answered(s){return S.answer[s.id]!==undefined;}
+function right(s){return S.answer[s.id]===s.a;}
 function settled(id){return !!(S.done[id]||S.skipped[id]);}
 function currentIndex(){for(var i=0;i<STEPS.length;i++)if(!settled(STEPS[i].id))return i;return -1;}
-function stepPoints(id){return (S.done[id]?10:0)+(S.done[id]&&S.photo[id]?5:0)+(S.guessed[id]===true?5:0);}
-function points(){return STEPS.reduce(function(p,s){return p+stepPoints(s.id);},0);}
-function rank(p){var r=RANKS[0][1];RANKS.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
+function stepPoints(s){return (right(s)?PTS.answer:0)+(S.done[s.id]&&S.photo[s.id]?PTS.photo:0)+(S.done[s.id]?PTS.done:0);}
+function points(){return STEPS.reduce(function(p,s){return p+stepPoints(s);},0);}
+function level(p){var k=0;LEVELS.forEach(function(x,i){if(p>=x[0])k=i;});return k;}
 function unlocked(i){var s=STEPS[i];return settled(s.id)||i===currentIndex()||!!S.opened[s.id];}
-function focusIndex(){var c=currentIndex();if(V.focus===null)return c<0?-1:c;return V.focus;}
+function focusIndex(){return V.focus===null?currentIndex():V.focus;}
 function photoCount(){return STEPS.filter(function(s){return S.photo[s.id];}).length;}
-function doneCount(){return STEPS.filter(function(s){return S.done[s.id];}).length;}
 
-/* ---------- Rendu ---------- */
-var $=function(id){return document.getElementById(id);};
-function render(){renderTop();renderMain();renderCta();renderTabs();}
-
-function renderTop(){
-  var fi=focusIndex(),cur=currentIndex(),title;
-  if(V.tab==='hunt')title=fi<0?'Trésor trouvé':'Étape '+(fi+1)+' <small>/ '+STEPS.length+'</small>';
-  else if(V.tab==='route')title='Le parcours';else title="L'album";
-  var seg=STEPS.map(function(s,i){var c=S.done[s.id]?'done':S.skipped[s.id]?'skip':(V.tab==='hunt'&&i===fi)?'here':'';
-    return '<i class="'+c+'" style="--c:'+DAYCOLOR[s.day]+'"></i>';}).join('');
-  $('top').innerHTML='<div class="bar"><span class="title">'+title+'</span><span class="score" id="score" aria-label="'+points()+' points"><span class="star">'+ic('star')+'</span>'+points()+'</span></div><div class="seg" aria-hidden="true">'+seg+'</div>';
+/* ---------- Disegni ---------- */
+var cupN=0;
+function cupSvg(p,cls){
+  var fill=Math.max(0,Math.min(1,p/MAX)),top=36,bot=86,y=(bot-(bot-top)*fill).toFixed(1),id='cupc'+(cupN++);
+  return '<svg class="'+(cls||'')+'" viewBox="0 0 120 110" aria-hidden="true">'+
+   '<defs><clipPath id="'+id+'"><path d="M18 34h70v24a35 28 0 01-70 0z"/></clipPath></defs>'+
+   '<g class="steam" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" opacity="'+(fill>0?1:0)+'">'+
+     '<path d="M38 26c-4-5 4-8 0-14"/><path d="M53 26c-4-5 4-8 0-14"/><path d="M68 26c-4-5 4-8 0-14"/></g>'+
+   '<ellipse cx="53" cy="98" rx="44" ry="7" fill="var(--surface2)"/>'+
+   '<g clip-path="url(#'+id+')"><rect x="10" y="'+y+'" width="90" height="70" fill="var(--tea)"/></g>'+
+   '<path d="M18 34h70v24a35 28 0 01-70 0z" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>'+
+   '<path d="M88 42h7a10 10 0 010 20h-9" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/>'+
+   '<path d="M62 30c3-10 13-14 22-13-1 10-9 16-20 15" fill="var(--leaf)"/><path d="M64 31c5-5 10-8 16-11" fill="none" stroke="var(--paper)" stroke-width="1.5" stroke-linecap="round"/></svg>';
 }
 
+function mapSvg(){
+  var cur=currentIndex(),h='';
+  h+='<svg viewBox="0 0 620 660" role="img" aria-label="Mappa del giro: le tappe scoperte sono segnate, le altre hanno un punto interrogativo">';
+  h+='<defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter></defs>';
+  h+='<path d="M568.7 20 L545 80 L526 125 L517.6 155 L528 200 L525 240 L549.8 290 L587.6 560 L600 660" fill="none" stroke="var(--river)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough)"/>';
+  h+='<path d="M303.8 55 L327.5 78 L370 90 L417.3 110 L474.1 135 L517.6 155" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" opacity=".7"/>';
+  [[30,230],[54,216],[150,240],[174,226],[24,420],[54,436],[196,140],[220,126],[180,450],[150,480],[390,250],[414,236],[110,560],[136,546],[340,420],[364,406]].forEach(function(m){
+    h+='<path d="M'+m[0]+' '+m[1]+' l12 -18 l12 18" fill="none" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';});
+  h+='<text x="380" y="56" font-size="13" font-weight="700" letter-spacing="3">MYANMAR</text>';
+  h+='<text x="574" y="420" font-size="13" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text>';
+  h+='<text x="556" y="350" font-size="14" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text>';
+  h+='<text x="24" y="636" font-size="11" font-weight="700" letter-spacing="2">10 km</text><path d="M24 644h95" stroke="var(--muted)" stroke-width="2"/>';
+  h+='<g transform="translate(66 70)"><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
+  var last=cur<0?STEPS.length-1:cur;
+  for(var i=1;i<=last;i++){var a=STEPS[i-1],b=STEPS[i],ahead=(i===last&&cur>=0);
+    h+='<path d="M'+a.x+' '+a.y+' L'+b.x+' '+b.y+'" stroke="'+DAYCOLOR[b.day]+'" stroke-width="'+(ahead?3:5)+'" stroke-linecap="round" fill="none"'+(ahead?' stroke-dasharray="1 9"':'')+' filter="url(#rough)"/>';}
+  var labels='';
+  STEPS.forEach(function(s,i){
+    var done=!!S.done[s.id],skip=!!S.skipped[s.id],here=i===cur,c=DAYCOLOR[s.day];
+    h+='<g data-act="goto" data-i="'+i+'" role="button" tabindex="0" aria-label="Tappa '+(i+1)+(done?': '+esc(s.short):': da scoprire')+'">';
+    h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="22" fill="transparent"/>';
+    if(here)h+='<circle class="pulse" cx="'+s.x+'" cy="'+s.y+'" r="14" fill="'+c+'"/>';
+    if(done){
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="14" fill="'+c+'" stroke="var(--paper)" stroke-width="3"/>';
+      h+='<path d="M'+(s.x-6)+' '+(s.y+.5)+' l4 4 l8 -9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    }else if(here){
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="14" fill="var(--surface)" stroke="'+c+'" stroke-width="4"/>';
+      h+='<text x="'+s.x+'" y="'+(s.y+5)+'" text-anchor="middle" font-size="13" font-weight="800" style="fill:var(--ink)">'+(i+1)+'</text>';
+    }else{
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="13" fill="var(--surface)" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 3" opacity="'+(skip?.5:1)+'"/>';
+      h+='<text x="'+s.x+'" y="'+(s.y+5.5)+'" text-anchor="middle" font-size="16" font-weight="700" style="font-family:var(--display)">'+(skip?'–':'?')+'</text>';
+    }
+    h+='</g>';
+    if(done||s.id==='retour')labels+='<text class="lab" x="'+(s.x+s.lx)+'" y="'+(s.y+s.ly)+'" text-anchor="'+s.anc+'">'+esc(s.short)+'</text>';
+    else if(here)labels+='<text class="lab" x="'+(s.x+s.lx)+'" y="'+(s.y+s.ly)+'" text-anchor="'+s.anc+'" style="fill:var(--accent)">Prossima tappa</text>';
+  });
+  return h+labels+'</svg>';
+}
+
+/* ---------- Rendering ---------- */
+var $=function(id){return document.getElementById(id);};
+function render(){cupN=0;renderTop();renderMain();renderCta();renderTabs();}
+
+function renderTop(){
+  var fi=focusIndex(),title;
+  if(V.tab==='hunt')title=fi<0?'Tesoro trovato':'Tappa '+(fi+1)+' <small>di '+STEPS.length+'</small>';
+  else if(V.tab==='map')title='La mappa';else title="L'album";
+  var seg=STEPS.map(function(s,i){var c=S.done[s.id]?'done':S.skipped[s.id]?'skip':(V.tab==='hunt'&&i===fi)?'here':'';
+    return '<i class="'+c+'" style="--c:'+DAYCOLOR[s.day]+'"></i>';}).join('');
+  $('top').innerHTML='<div class="bar"><span class="title">'+title+'</span><span class="leaves" id="leaves" aria-label="'+points()+' foglie di tè"><span class="lf">'+ic('leaf')+'</span>'+points()+'</span></div><div class="seg" aria-hidden="true">'+seg+'</div>';
+}
 function renderTabs(){
-  var t=[['hunt','compass','Chasse'],['route','route','Parcours'],['album','photos','Album']];
-  var n=photoCount();
+  var t=[['map','map','Mappa'],['hunt','compass','Tappa'],['album','photos','Album']],n=photoCount();
   $('tabs').innerHTML=t.map(function(x){return '<button data-act="tab" data-tab="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'><span class="ic">'+ic(x[1])+
     (x[0]==='album'&&n?'<span class="badge">'+n+'</span>':'')+'</span>'+x[2]+'</button>';}).join('');
 }
+function renderMain(){var m=$('main');m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();hydrate(m);}
 
-function renderMain(){
-  var m=$('main');
-  if(V.tab==='route')m.innerHTML=routeView();
-  else if(V.tab==='album')m.innerHTML=albumView();
-  else m.innerHTML=huntView();
-  hydrate(m);
+function mapView(){
+  var p=points(),k=level(p),next=LEVELS[k+1],got=earned(),done=STEPS.filter(function(s){return S.done[s.id];}).length;
+  var h='<div class="maphead"><h1>La caccia <em>di Ugo</em></h1><p>'+done+' tappe scoperte su '+STEPS.length+' · tocca un punto della mappa</p></div>';
+  h+='<div class="map">'+mapSvg()+'<div class="legend"><span><i style="background:var(--d1)"></i>Gio</span><span><i style="background:var(--d2)"></i>Ven</span><span><i style="background:var(--d3)"></i>Sab</span><span><i style="background:var(--d4)"></i>Dom</span><span><i style="border:2px dashed var(--muted)"></i>Da scoprire</span></div></div>';
+  h+='<section class="sect"><h2>La tua tazza di tè</h2><div class="cupbox">'+cupSvg(p)+'<div><div class="lvl">'+LEVELS[k][1]+'</div>'+
+     '<div class="sub">'+p+' foglie di tè su '+MAX+(next?' · ancora '+(next[0]-p)+' per « '+next[1]+' »':'')+'</div>'+
+     '<div class="meter"><i style="width:'+Math.round(p/MAX*100)+'%"></i></div></div></div>'+
+     '<p class="howpts">Risposta giusta +3 · foto +2 · tappa convalidata +5</p></section>';
+  h+='<section class="sect"><h2>Timbri del passaporto <small style="font-family:var(--body);font-size:.8rem;color:var(--muted)">'+got.length+' / '+STAMPS.length+'</small></h2><div class="stamps">';
+  STAMPS.forEach(function(b){var on=got.indexOf(b.id)>=0;
+    h+='<div class="stamp'+(on?' on':'')+'" style="--c:'+b.c+'"><span class="s">'+ic(b.icon)+'</span><span>'+esc(on?b.name:b.how)+'</span></div>';});
+  h+='</div></section>';
+  h+='<div class="minor" style="margin-top:28px">'+(V.confirmReset?'':'<button data-act="askreset">Ricomincia la caccia</button>')+'</div>';
+  if(V.confirmReset)h+='<div class="confirm"><b>Cancellare tutto?</b><span>Foglie, timbri e foto dell\'app verranno eliminati. Le foto già salvate nel telefono restano.</span><div class="two"><button class="danger" data-act="reset">Cancella tutto</button><button data-act="noreset">Annulla</button></div></div>';
+  return h;
 }
 
 function huntView(){
   var i=focusIndex();
   if(i<0)return finaleView();
   var s=STEPS[i],c=DAYCOLOR[s.day],h='';
-  var nav='<div class="nav"><button data-act="prev"'+(i===0?' disabled':'')+'>'+ic('left')+'Précédente</button><button data-act="next"'+(i===STEPS.length-1?' disabled':'')+'>Suivante'+ic('right')+'</button></div>';
+  var nav='<div class="nav"><button data-act="prev"'+(i===0?' disabled':'')+'>'+ic('left')+'Precedente</button><button data-act="next"'+(i===STEPS.length-1?' disabled':'')+'>Successiva'+ic('right')+'</button></div>';
   if(!unlocked(i)){
     return '<section class="card" style="--c:'+c+'"><span class="when"><span class="dot"></span>'+esc(s.when)+'</span>'+
-      '<div class="locked"><span class="lock">'+ic('lock')+'</span><h2>Étape mystère</h2><p>Elle s\'ouvre quand la précédente est validée. Si le programme change sur place, tu peux l\'ouvrir maintenant.</p>'+
-      '<button class="chipbtn" data-act="unlock">'+ic('eye')+'L\'ouvrir maintenant</button></div></section>'+nav;
+      '<div class="locked"><span class="lock">?</span><h2>Tappa da scoprire</h2><p>Si apre quando hai convalidato la precedente. Se il programma cambia sul posto, puoi aprirla adesso.</p>'+
+      '<button class="chipbtn" data-act="unlock">Aprila adesso</button></div></section>'+nav;
   }
-  var rev=!!S.revealed[s.id];
+  var ans=answered(s);
   h+='<section class="card" style="--c:'+c+'">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span class="when"><span class="dot"></span>'+esc(s.when)+'</span><span class="num">'+String(i+1).padStart(2,'0')+'</span></div>';
-  h+='<p class="riddle">'+esc(s.riddle)+'</p>';
-  if(!rev){
-    h+=S.hint[s.id]?'<p class="hint">'+ic('bulb')+'<span>'+esc(s.hint)+'</span></p>':'<div><button class="chipbtn" data-act="hint">'+ic('bulb')+'Un indice</button></div>';
-    h+='<div class="place veiled" aria-hidden="true"><span class="lbl">Le lieu</span><h2>'+esc(s.place)+'</h2><p>'+esc(s.about)+'</p></div>';
+  h+='<span class="qlbl">'+ic('quiz')+'Quiz · +3 foglie</span><p class="q">'+esc(s.q)+'</p>';
+  h+='<div class="opts'+(ans?' answered':'')+'" role="group" aria-label="Risposte">';
+  s.o.forEach(function(o,k){
+    var cls='opt',key=LETTERS[k];
+    if(ans){if(k===s.a){cls+=' right';key=ic('check');}else if(k===S.answer[s.id]){cls+=' wrong';key=ic('x');}else cls+=' dim';}
+    h+='<button class="'+cls+'" data-act="answer" data-k="'+k+'"'+(ans?' aria-disabled="true"':'')+'><span class="k">'+key+'</span><span>'+esc(o)+'</span></button>';
+  });
+  h+='</div>';
+  if(!ans){
+    h+='<div class="mystery"><span class="qm">?</span>Rispondi per scoprire il luogo e la sfida foto</div>';
   }else{
-    h+='<div class="place shown"><span class="lbl">Le lieu</span><h2>'+esc(s.place)+'</h2><p>'+esc(s.about)+'</p></div>';
-    h+='<div class="links"><a class="chipbtn" href="'+esc(s.maps)+'" target="_blank" rel="noopener">'+ic('pin')+'Ouvrir dans Maps</a></div>';
-    if(S.guessed[s.id]===undefined){
-      h+='<div class="guess"><b>Tu avais trouvé avant de révéler ?</b><div class="two"><button class="yes" data-act="guess" data-v="1">Oui · +5</button><button data-act="guess" data-v="0">Non</button></div></div>';
-    }else{
-      h+='<p class="guessed">'+(S.guessed[s.id]?'Trouvé tout seul · +5':'Pas trouvé cette fois')+'</p>';
-    }
-    h+='<div class="mission"><span class="lbl">'+ic('cam')+'Défi photo · +5</span><p>'+esc(s.mission)+'</p>';
-    if(S.photo[s.id]){
-      h+='<div class="pic"><img data-photo="'+s.id+'" alt="Votre photo : '+esc(s.place)+'" data-act="view" data-id="'+s.id+'"><button data-act="photo">'+ic('swap')+'Changer</button></div>';
-    }else{
-      h+='<button class="shot" data-act="photo">'+ic('cam')+'<span>Prendre ou choisir la photo<small>Appareil photo ou galerie</small></span></button>';
-    }
-    if(V.saving===s.id)h+='<p class="saving">Enregistrement de la photo…</p>';
+    h+=right(s)?'<div class="verdict ok"><div><b>Esatto!</b>'+esc(s.f)+'</div><span class="gain">+3'+ic('leaf')+'</span></div>'
+               :'<div class="verdict ko"><div><b>Era « '+esc(s.o[s.a])+' »</b>'+esc(s.f)+'</div></div>';
+    h+='<div class="place"><span class="lbl">Il luogo</span><h2>'+esc(s.place)+'</h2><p>'+esc(s.about)+'</p></div>';
+    h+='<div><a class="chipbtn" href="'+esc(s.maps)+'" target="_blank" rel="noopener">'+ic('pin')+'Apri in Maps</a></div>';
+    h+='<div class="mission"><span class="lbl">'+ic('cam')+'Sfida foto · +2 foglie</span><p>'+esc(s.mission)+'</p>';
+    if(S.photo[s.id])h+='<div class="pic"><img data-photo="'+s.id+'" alt="La vostra foto: '+esc(s.place)+'" data-act="view" data-id="'+s.id+'"><button data-act="photo">'+ic('swap')+'Cambia</button></div>';
+    else h+='<button class="shot" data-act="photo">'+ic('cam')+'<span>Scatta o scegli la foto<small>Fotocamera o galleria</small></span></button>';
+    if(V.saving===s.id)h+='<p class="saving">Salvataggio della foto…</p>';
     if(V.error)h+='<p class="err">'+esc(V.error)+'</p>';
     h+='</div>';
   }
   if(!settled(s.id)){
-    if(V.confirmSkip){
-      h+='<div class="confirm"><b>Passer cette étape ?</b><span>Elle ne rapporte pas de points. Tu pourras y revenir depuis le parcours.</span><div class="two"><button class="danger" data-act="skip">Passer</button><button data-act="noskip">Annuler</button></div></div>';
-    }else h+='<div class="minor"><button data-act="askskip">Le programme a changé ? Passer cette étape</button></div>';
-  }else if(S.skipped[s.id]){
-    h+='<p class="guessed">Étape passée. Tu peux encore la valider.</p>';
-  }
-  h+='</section>'+nav;
-  return h;
+    if(V.confirmSkip)h+='<div class="confirm"><b>Saltare questa tappa?</b><span>Non dà foglie. Potrai tornarci dalla mappa.</span><div class="two"><button class="danger" data-act="skip">Salta</button><button data-act="noskip">Annulla</button></div></div>';
+    else h+='<div class="minor"><button data-act="askskip">Il programma è cambiato? Salta questa tappa</button></div>';
+  }else if(S.skipped[s.id])h+='<p class="note">Tappa saltata. Puoi ancora convalidarla.</p>';
+  else h+='<p class="note">Tappa convalidata · '+stepPoints(s)+' foglie</p>';
+  return h+'</section>'+nav;
 }
 
 function finaleView(){
-  return '<section class="treasure"><span class="when" style="color:inherit;opacity:.7;justify-content:center">Boucle bouclée</span><h2>Trésor trouvé</h2>'+
-    '<p>'+points()+' points sur '+MAX+' · '+esc(rank(points()))+'</p><p>Le trésor, c\'est l\'album : 4 jours, 400 km, et nous deux sur chaque photo.</p><p class="sign">Lison</p></section>'+
-    '<div class="stats" style="margin-top:12px">'+stats()+'</div>';
-}
-function stats(){var g=STEPS.filter(function(s){return S.guessed[s.id]===true;}).length;
-  return '<div class="stat"><b>'+doneCount()+'</b><span>étapes</span></div><div class="stat"><b>'+photoCount()+'</b><span>photos</span></div><div class="stat"><b>'+g+'</b><span>trouvées seul</span></div>';}
-
-function routeView(){
-  var cur=currentIndex(),h='<div class="hero"><h1>La chasse <em>d\'Ugo</em></h1><div class="stats">'+stats()+'</div></div>';
-  [1,2,3,4].forEach(function(d){
-    var idx=[];STEPS.forEach(function(s,i){if(s.day===d)idx.push(i);});
-    var dn=idx.filter(function(i){return settled(STEPS[i].id);}).length;
-    h+='<div class="dayh" style="--c:'+DAYCOLOR[d]+'"><span class="dot"></span><h2>'+DAYS[d]+'</h2><small>'+dn+' / '+idx.length+'</small></div>';
-    h+='<p style="margin:-6px 4px 10px;color:var(--muted);font-size:.88rem;font-weight:600">'+DAYNAME[d]+'</p><ol class="list">';
-    idx.forEach(function(i){var s=STEPS[i],u=unlocked(i),done=!!S.done[s.id];
-      var name=(u&&S.revealed[s.id])?s.place:(u?'Énigme à résoudre':'Étape mystère');
-      var cls='row'+(done?' done':'')+(i===cur?' here':'')+(u?'':' lock');
-      h+='<li><button class="'+cls+'" style="--c:'+DAYCOLOR[s.day]+'" data-act="goto" data-i="'+i+'"><span class="b">'+(done?ic('check'):(u?i+1:ic('lock')))+'</span>'+
-        '<span class="t"><b>'+esc(name)+'</b><span>'+esc(s.when.split(' · ')[1])+(S.skipped[s.id]?' · passée':'')+(i===cur?' · en cours':'')+'</span></span>'+
-        (S.photo[s.id]?'<img data-photo="'+s.id+'" alt="">':'<span class="go">'+ic('right')+'</span>')+'</button></li>';});
-    h+='</ol>';
-  });
-  h+='<div class="minor" style="margin-top:24px">'+(V.confirmReset?'':'<button data-act="askreset">Recommencer la chasse</button>')+'</div>';
-  if(V.confirmReset)h+='<div class="confirm"><b>Tout effacer ?</b><span>Points et photos de l\'appli seront supprimés. Les photos déjà enregistrées dans ton téléphone ne sont pas touchées.</span><div class="two"><button class="danger" data-act="reset">Tout effacer</button><button data-act="noreset">Annuler</button></div></div>';
-  return h;
+  return '<section class="treasure"><span class="when" style="justify-content:center">Giro completato</span><h2>Tesoro trovato</h2>'+
+    '<div style="display:grid;place-items:center">'+cupSvg(points(),'cup')+'</div>'+
+    '<p><b>'+points()+' foglie di tè</b> su '+MAX+' · '+LEVELS[level(points())][1]+' · '+earned().length+' timbri su '+STAMPS.length+'</p>'+
+    '<p>Il tesoro è questo album: 4 giorni, 400 km, e noi due in ogni foto.</p><p class="sign">Lison</p></section>';
 }
 
 function albumView(){
   var ps=STEPS.filter(function(s){return S.photo[s.id];});
-  if(!ps.length)return '<div class="empty">'+ic('photos')+'<b>Pas encore de photo</b><span>Chaque défi photo relevé arrive ici.</span></div>';
-  var h='<div class="hero"><h1>Nos <em>photos</em></h1><p style="color:var(--muted);font-weight:600">'+ps.length+' photo'+(ps.length>1?'s':'')+' · touche une photo pour l\'agrandir</p></div><div class="grid">';
+  if(!ps.length)return '<div class="empty">'+ic('photos')+'<b>Ancora nessuna foto</b><span>Ogni sfida foto finisce qui.</span></div>';
+  var h='<div class="hero"><h1>Le nostre <em>foto</em></h1><p style="color:var(--muted);font-weight:600">'+ps.length+' foto · tocca una foto per ingrandirla</p></div><div class="grid">';
   ps.forEach(function(s){h+='<button data-act="view" data-id="'+s.id+'"><img data-photo="'+s.id+'" alt="'+esc(s.place)+'" loading="lazy"><span class="cap">'+esc(s.place)+'</span></button>';});
   return h+'</div>';
 }
 
 function renderCta(){
-  var c=$('cta'),h='';
+  var c=$('cta'),h='',extra='',cur=currentIndex();
   if(V.tab==='album'){
-    h=photoCount()?'<button class="primary alt" data-act="shareall">'+ic('share')+'<span>Partager toutes les photos</span></button>':'';
-  }else if(V.tab==='route'){
-    var cur=currentIndex();
-    h=cur<0?'':'<button class="primary" data-act="resume">'+ic('compass')+'<span>Reprendre l\'étape '+(cur+1)+'</span></button>';
+    if(photoCount())h='<button class="primary alt" data-act="shareall">'+ic('share')+'<span>Condividi tutte le foto</span></button>';
+  }else if(V.tab==='map'){
+    h=cur<0?'<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Apri l\'album</span></button>'
+           :'<button class="primary" data-act="resume">'+ic('compass')+'<span>Vai alla tappa '+(cur+1)+'</span></button>';
   }else{
     var i=focusIndex();
-    if(i<0){h='<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Voir l\'album</span></button>';}
+    if(i<0)h='<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Apri l\'album</span></button>';
     else{var s=STEPS[i];
-      if(!unlocked(i))h='<button class="primary alt" data-act="resume">'+ic('compass')+'<span>Revenir à l\'étape en cours</span></button>';
-      else if(!S.revealed[s.id])h='<button class="primary" id="hold" data-act="hold" aria-label="Maintenir pour révéler le lieu"><span class="fill"></span>'+ic('eye')+'<span>Maintenir pour révéler</span></button>';
-      else if(!S.done[s.id])h=S.photo[s.id]
-        ?'<button class="primary" data-act="validate">'+ic('check')+'<span>Valider l\'étape</span><span class="pts">+'+(10+5+(S.guessed[s.id]===true?5:0))+'</span></button>'
-        :'<button class="primary" data-act="photo">'+ic('cam')+'<span>Prendre la photo</span></button>';
-      else{var cur2=currentIndex();
-        h=cur2<0?'<button class="primary" data-act="resume">'+ic('gift')+'<span>Voir le trésor</span></button>'
-          :(cur2===i?'':'<button class="primary alt" data-act="resume">'+ic('arrow')+'<span>'+(cur2>i?'Aller à l\'étape '+(cur2+1):'Revenir à l\'étape '+(cur2+1))+'</span></button>');}
+      if(!unlocked(i))h='<button class="primary alt" data-act="resume">'+ic('compass')+'<span>Torna alla tappa in corso</span></button>';
+      else if(answered(s)&&!S.done[s.id]){
+        if(S.photo[s.id])h='<button class="primary" data-act="validate">'+ic('check')+'<span>Convalida la tappa</span><span class="pts">+'+(PTS.done+PTS.photo)+ic('leaf')+'</span></button>';
+        else{h='<button class="primary" data-act="photo">'+ic('cam')+'<span>Scatta la foto</span></button>';
+          extra='<div class="minor" style="padding-top:2px"><button data-act="validate" style="min-height:36px">Convalida senza foto (+5)</button></div>';}
+      }else if(S.done[s.id]&&cur!==i)h='<button class="primary alt" data-act="resume">'+ic('arrow')+'<span>'+(cur<0?'Vedi il tesoro':'Vai alla tappa '+(cur+1))+'</span></button>';
     }
   }
-  c.innerHTML=h?'<div class="in">'+h+'</div>':'';c.hidden=!h;
-  // petite validation sans photo, sous le bouton principal
-  if(V.tab==='hunt'){var i2=focusIndex();if(i2>=0){var s2=STEPS[i2];
-    if(unlocked(i2)&&S.revealed[s2.id]&&!S.done[s2.id]&&!S.photo[s2.id]){
-      c.querySelector('.in').insertAdjacentHTML('beforeend','<div class="minor" style="padding-top:2px"><button data-act="validate" style="min-height:36px">Valider sans photo (+10)</button></div>');}}}
-  bindHold();
+  c.innerHTML=h?'<div class="in">'+h+extra+'</div>':'';c.hidden=!h;
 }
 
-/* ---------- Appui long pour révéler ---------- */
-function bindHold(){
-  var b=$('hold');if(!b)return;var t0=0,raf=0,dur=900;
-  function stop(){cancelAnimationFrame(raf);raf=0;b.style.setProperty('--p',0);}
-  function tick(){var p=Math.min(1,(performance.now()-t0)/dur);b.style.setProperty('--p',p);
-    if(p>=1){raf=0;buzz(30);reveal();return;}raf=requestAnimationFrame(tick);}
-  b.addEventListener('pointerdown',function(e){e.preventDefault();t0=performance.now();buzz(8);raf=requestAnimationFrame(tick);});
-  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,function(){if(raf)stop();});});
-  b.addEventListener('contextmenu',function(e){e.preventDefault();});
-  b.addEventListener('click',function(e){if(e.detail===0)reveal();}); // clavier, lecteur d'écran
-}
-function reveal(){var s=STEPS[focusIndex()];S.revealed[s.id]=true;save();render();}
+/* ---------- Azioni ---------- */
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
-
-/* ---------- Actions ---------- */
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g[data-act]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act');
   var i=focusIndex(),s=i>=0?STEPS[i]:null;
   switch(a){
     case 'tab':V.tab=b.getAttribute('data-tab');V.confirmReset=false;render();scrollTo(0,0);break;
-    case 'hint':S.hint[s.id]=true;save();render();break;
-    case 'guess':S.guessed[s.id]=b.getAttribute('data-v')==='1';save();render();if(S.guessed[s.id])bump();break;
+    case 'answer':if(answered(s))return;S.answer[s.id]=+b.getAttribute('data-k');save();render();
+      if(right(s)){bump();buzz(25);}else buzz([40,60,40]);break;
     case 'photo':pickFor=s.id;$('file').value='';$('file').click();break;
     case 'validate':validate(i);break;
     case 'askskip':V.confirmSkip=true;render();break;
     case 'noskip':V.confirmSkip=false;render();break;
-    case 'skip':S.skipped[s.id]=true;save();V.confirmSkip=false;V.focus=null;render();scrollTo(0,0);toast('Étape passée');break;
+    case 'skip':S.skipped[s.id]=true;save();V.confirmSkip=false;V.focus=null;render();scrollTo(0,0);toast('Tappa saltata');break;
     case 'unlock':S.opened[s.id]=true;save();render();break;
     case 'prev':V.focus=Math.max(0,i-1);V.confirmSkip=false;render();scrollTo(0,0);break;
     case 'next':V.focus=Math.min(STEPS.length-1,i+1);V.confirmSkip=false;render();scrollTo(0,0);break;
     case 'resume':V.tab='hunt';V.focus=null;render();scrollTo(0,0);break;
     case 'goto':V.tab='hunt';V.focus=+b.getAttribute('data-i');V.confirmSkip=false;render();scrollTo(0,0);break;
     case 'view':openViewer(b.getAttribute('data-id'));break;
-    case 'shareall':shareAll();break;
+    case 'shareall':shareFiles(STEPS.filter(function(x){return S.photo[x.id];}));break;
     case 'askreset':V.confirmReset=true;render();break;
     case 'noreset':V.confirmReset=false;render();break;
-    case 'reset':var keep={started:true,installSeen:S.installSeen};S=Object.assign(fresh(),keep);save();clearPhotos().then(function(){urls={};V={tab:'hunt',focus:null};render();toast('Chasse remise à zéro');});break;
+    case 'reset':S=Object.assign(fresh(),{started:true,installSeen:S.installSeen});save();
+      clearPhotos().then(function(){urls={};V={tab:'map',focus:null};render();scrollTo(0,0);toast('Caccia azzerata');});break;
   }
 });
 
@@ -583,54 +644,60 @@ $('file').addEventListener('change',function(){
   compress(f).then(function(blob){return putPhoto(id,blob);}).then(function(){
     if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id];}
     S.photo[id]=true;save();V.saving=null;buzz(15);render();
-  }).catch(function(){V.saving=null;V.error="La photo n'a pas pu être enregistrée. La mémoire du téléphone est peut-être pleine : réessaie avec une autre photo.";render();});
+  }).catch(function(){V.saving=null;V.error="La foto non è stata salvata. Forse la memoria del telefono è piena: riprova con un'altra foto.";render();});
 });
 
 function validate(i){
-  var s=STEPS[i],before=rank(points());
+  var s=STEPS[i],lv=level(points()),before=earned();
   S.done[s.id]=Date.now();delete S.skipped[s.id];save();
-  var gain=stepPoints(s.id),after=rank(points());
+  var gain=PTS.done+(S.photo[s.id]?PTS.photo:0),lv2=level(points());
+  var news=earned().filter(function(x){return before.indexOf(x)<0;});
   V.focus=null;V.confirmSkip=false;render();scrollTo(0,0);bump();buzz([20,40,20]);
-  celebrate(s,gain,before!==after?after:null);
+  celebrate(s,gain,lv2>lv?LEVELS[lv2][1]:null,news);
 }
-function bump(){var e=$('score');if(e){e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump');}}
+function bump(){var e=$('leaves');if(e){e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump');}}
 function toast(t){var d=document.createElement('div');d.className='toast';d.textContent=t;$('layer').appendChild(d);setTimeout(function(){d.remove();},1800);}
 
-/* ---------- Fête ---------- */
-function celebrate(s,gain,newRank){
-  var last=currentIndex()<0;
-  var box=document.createElement('div');box.className='party';box.style.setProperty('--c',DAYCOLOR[s.day]);
-  box.innerHTML='<canvas></canvas><div class="box" role="dialog" aria-modal="true" aria-label="Étape validée"><span class="ok">'+ic('check')+'</span>'+
-    '<h2>'+esc(s.place)+'</h2><span class="gain">+'+gain+'</span>'+(newRank?'<span class="rk">Nouveau grade : '+esc(newRank)+'</span>':'<span class="rk">'+esc(rank(points()))+'</span>')+
-    '<button class="primary" data-close>'+(last?ic('gift')+'<span>Découvrir le trésor</span>':ic('arrow')+'<span>Énigme suivante</span>')+'</button></div>';
+/* ---------- Festa ---------- */
+function celebrate(s,gain,newLevel,stamps){
+  var last=currentIndex()<0,p=points();
+  var box=document.createElement('div');box.className='party';
+  var st=stamps.map(function(id){var b=STAMPS.filter(function(x){return x.id===id;})[0];
+    return '<span class="newstamp" style="--c:'+b.c+'"><span class="s">'+ic(b.icon)+'</span>Nuovo timbro: '+esc(b.name)+'</span>';}).join('');
+  box.innerHTML='<canvas></canvas><div class="box" role="dialog" aria-modal="true" aria-label="Tappa convalidata">'+cupSvg(p,'cup')+
+    '<h2>'+esc(s.place)+'</h2><span class="gain">+'+gain+ic('leaf')+'</span>'+
+    '<span class="rk">'+(newLevel?'Nuovo livello: '+esc(newLevel):esc(LEVELS[level(p)][1])+' · '+p+' foglie')+'</span>'+st+
+    '<button class="primary" data-close>'+(last?ic('gift')+'<span>Scopri il tesoro</span>':ic('map')+'<span>Guarda la mappa</span>')+'</button></div>';
   $('layer').appendChild(box);
-  box.querySelector('[data-close]').addEventListener('click',function(){box.remove();});
-  box.querySelector('[data-close]').focus();
+  var btn=box.querySelector('[data-close]');
+  btn.addEventListener('click',function(){box.remove();V.tab=last?'hunt':'map';render();scrollTo(0,0);});
+  btn.focus();
   confetti(box.querySelector('canvas'));
 }
 function confetti(cv){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var dpr=Math.min(2,devicePixelRatio||1),W=innerWidth,H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;
   var x=cv.getContext('2d');x.scale(dpr,dpr);
-  var cs=getComputedStyle(document.documentElement),cols=['--d1','--d2','--d3','--d4','--gold','--accent'].map(function(v){return cs.getPropertyValue(v).trim();});
-  var P=[];for(var k=0;k<120;k++)P.push({x:W/2,y:H*.42,vx:(Math.random()-.5)*11,vy:-Math.random()*13-4,r:Math.random()*6+4,a:Math.random()*6,va:(Math.random()-.5)*.3,c:cols[k%cols.length]});
+  var cs=getComputedStyle(document.documentElement),cols=['--leaf','--leaf','--leaf','--d1','--d2','--gold'].map(function(v){return cs.getPropertyValue(v).trim();});
+  var P=[];for(var k=0;k<110;k++)P.push({x:W/2,y:H*.4,vx:(Math.random()-.5)*11,vy:-Math.random()*13-4,r:Math.random()*7+6,a:Math.random()*6,va:(Math.random()-.5)*.25,c:cols[k%cols.length]});
   var t0=performance.now();
-  (function f(t){x.clearRect(0,0,W,H);var alive=t-t0<2600;
-    P.forEach(function(p){p.vy+=.32;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore();});
-    if(alive&&cv.isConnected)requestAnimationFrame(f);else x.clearRect(0,0,W,H);})(t0);
+  (function f(t){x.clearRect(0,0,W,H);
+    P.forEach(function(p){p.vy+=.3;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;
+      x.beginPath();x.ellipse(0,0,p.r,p.r*.45,0,0,Math.PI*2);x.fill();x.restore();});
+    if(t-t0<2600&&cv.isConnected)requestAnimationFrame(f);else x.clearRect(0,0,W,H);})(t0);
 }
 
-/* ---------- Visionneuse ---------- */
+/* ---------- Visore ---------- */
 function openViewer(id){
   var list=STEPS.filter(function(s){return S.photo[s.id];}),k=list.findIndex(function(s){return s.id===id;});if(k<0)return;
   var v=document.createElement('div');v.className='viewer';v.setAttribute('role','dialog');v.setAttribute('aria-modal','true');
   function draw(){var s=list[k];
-    v.innerHTML='<div class="vt"><span style="font-weight:700;font-size:.9rem;opacity:.8">'+(k+1)+' / '+list.length+'</span><button data-v="close" aria-label="Fermer">'+ic('x')+'</button></div>'+
+    v.innerHTML='<div class="vt"><span style="font-weight:700;font-size:.9rem;opacity:.8">'+(k+1)+' / '+list.length+'</span><button data-v="close" aria-label="Chiudi">'+ic('x')+'</button></div>'+
       '<div class="stage"><img data-photo="'+s.id+'" alt="'+esc(s.place)+'"></div>'+
-      '<div class="vb"><div><b>'+esc(s.place)+'</b><br><span>'+esc(s.when)+' · appui long pour l\'enregistrer</span></div><div class="acts">'+
-      '<button data-v="prev" aria-label="Photo précédente"'+(k===0?' disabled style="opacity:.3"':'')+'>'+ic('left')+'</button>'+
-      '<button data-v="share">'+ic('share')+'Partager</button>'+
-      '<button data-v="next" aria-label="Photo suivante"'+(k===list.length-1?' disabled style="opacity:.3"':'')+'>'+ic('right')+'</button></div></div>';
+      '<div class="vb"><div><b>'+esc(s.place)+'</b><br><span>'+esc(s.when)+' · tienila premuta per salvarla</span></div><div class="acts">'+
+      '<button data-v="prev" aria-label="Foto precedente"'+(k===0?' disabled style="opacity:.3"':'')+'>'+ic('left')+'</button>'+
+      '<button data-v="share">'+ic('share')+'Condividi</button>'+
+      '<button data-v="next" aria-label="Foto successiva"'+(k===list.length-1?' disabled style="opacity:.3"':'')+'>'+ic('right')+'</button></div></div>';
     hydrate(v);}
   v.addEventListener('click',function(e){var b=e.target.closest('[data-v]');if(!b)return;var a=b.getAttribute('data-v');
     if(a==='close')v.remove();else if(a==='prev'&&k>0){k--;draw();}else if(a==='next'&&k<list.length-1){k++;draw();}else if(a==='share')shareFiles([list[k]]);});
@@ -640,28 +707,27 @@ function openViewer(id){
   draw();$('layer').appendChild(v);
 }
 
-/* ---------- Partage ---------- */
-function shareAll(){shareFiles(STEPS.filter(function(s){return S.photo[s.id];}));}
+/* ---------- Condivisione ---------- */
 function shareFiles(list){
   Promise.all(list.map(function(s){return getPhoto(s.id).then(function(b){
     var n=STEPS.indexOf(s)+1;return b?new File([b],String(n).padStart(2,'0')+'-'+s.id+'.jpg',{type:'image/jpeg'}):null;});}))
   .then(function(files){files=files.filter(Boolean);
     if(navigator.canShare&&navigator.canShare({files:files}))return navigator.share({files:files,title:'Boucle du Nord'});
-    toast("Partage indisponible ici : ouvre la photo et appuie longuement dessus");})
-  .catch(function(e){if(!e||e.name!=='AbortError')toast("Le partage n'a pas abouti");});
+    toast('Apri la foto e tienila premuta per salvarla');})
+  .catch(function(e){if(!e||e.name!=='AbortError')toast('Condivisione non riuscita');});
 }
 
-/* ---------- Accueil et installation ---------- */
+/* ---------- Benvenuto e installazione ---------- */
 function welcome(){
   var w=document.createElement('div');w.className='welcome';
-  w.innerHTML='<span class="k">Boucle du Nord · 15 → 18 octobre</span><h1>La chasse<em>d\'Ugo</em></h1>'+
-    '<p style="font-size:1.05rem">16 étapes, 4 jours de scooter, et une énigme à chaque arrêt.</p>'+
-    '<ul class="rules"><li><span class="ri">'+ic('bulb')+'</span>Lis l\'énigme et devine où on va</li>'+
-    '<li><span class="ri">'+ic('eye')+'</span>Maintiens le bouton pour révéler le lieu</li>'+
-    '<li><span class="ri">'+ic('cam')+'</span>Relève le défi avec une photo de nous deux</li>'+
-    '<li><span class="ri">'+ic('star')+'</span>Gagne jusqu\'à 20 points par étape</li></ul>'+
-    '<p class="sign" style="color:var(--accent);font-size:1.1rem">Lison</p>'+
-    '<button class="primary" data-start>'+ic('compass')+'<span>C\'est parti</span></button>';
+  w.innerHTML='<span class="k">Nord della Thailandia · 15 → 18 ottobre</span><h1>La caccia<em>di Ugo</em></h1>'+
+    '<p style="font-size:1.05rem">16 tappe, 4 giorni di scooter, un quiz a ogni sosta.</p>'+
+    '<ul class="rules"><li><span class="ri">'+ic('quiz')+'</span>Rispondi al quiz e scopri il luogo</li>'+
+    '<li><span class="ri">'+ic('cam')+'</span>Supera la sfida con una foto di noi due</li>'+
+    '<li><span class="ri g">'+ic('leaf')+'</span>Raccogli foglie di tè e riempi la tazza</li>'+
+    '<li><span class="ri">'+ic('map')+'</span>Scopri la mappa e colleziona i timbri</li></ul>'+
+    '<p class="sign" style="font-size:1.1rem">Lison</p>'+
+    '<button class="primary" data-start>'+ic('compass')+'<span>Si parte!</span></button>';
   document.body.appendChild(w);
   w.querySelector('[data-start]').addEventListener('click',function(){S.started=true;save();w.remove();installSheet();});
 }
@@ -669,7 +735,7 @@ function installSheet(){
   var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
   if(standalone||S.installSeen)return;
   var d=document.createElement('div');d.className='sheet';d.setAttribute('role','dialog');
-  d.innerHTML='<b>À faire une fois, avec du réseau</b><p>Dans Safari : bouton Partager, puis « Sur l\'écran d\'accueil ». Ouvre ensuite la chasse toujours depuis l\'icône : elle marche sans connexion et garde les photos.</p><button>Compris</button>';
+  d.innerHTML='<b>Da fare una volta, con il wifi</b><p>In Safari: tocca Condividi, poi « Aggiungi alla schermata Home ». Poi apri la caccia sempre dall\'icona: funziona senza connessione e conserva le foto.</p><button>Ho capito</button>';
   $('layer').appendChild(d);
   d.querySelector('button').addEventListener('click',function(){S.installSeen=true;save();d.remove();});
 }
