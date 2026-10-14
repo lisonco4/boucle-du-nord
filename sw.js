@@ -1,5 +1,5 @@
 // Met tout en cache à la première visite : le carnet et la chasse marchent ensuite sans réseau.
-const CACHE = 'boucle-du-nord-v6';
+const CACHE = 'boucle-du-nord-v7';
 const FILES = ['./', './index.html', './chasse.html', './carnet.webmanifest', './chasse.webmanifest',
   './fonts/fonts.css', './fonts/fraunces.woff2', './fonts/fraunces-italic.woff2', './fonts/manrope.woff2',
   './icons/carnet-180.png', './icons/carnet-192.png', './icons/carnet-512.png',
@@ -12,7 +12,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   // Réseau faible en montagne : au-delà de 3 s, on sert la copie en cache.
   const fromCache = () => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./index.html'));
-  const net = fetch(req).then(res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; });
+  const net = fetch(req.url, { cache: 'no-cache' }).then(res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; });
   const slow = new Promise((_, rej) => setTimeout(rej, 3000));
   e.respondWith(Promise.race([net, slow]).catch(() => fromCache().then(r => r || net)));
 });
