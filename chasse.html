@@ -48,7 +48,7 @@ svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-widt
 /* Barre du haut */
 .top{position:sticky;top:var(--st);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:10px 16px 8px;display:grid;gap:8px}
-.top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top .bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .top .title{font-family:var(--display);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:8px;min-width:0}
 .top .title small{font-family:var(--body);font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
 .score{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;
@@ -217,7 +217,7 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 104px);max-width:560px;margi
 .rules{display:grid;gap:12px;list-style:none;padding:0;margin:0}
 .rules li{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;font-weight:600;font-size:.98rem}
 .rules .ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--blush);color:var(--accent)}
-.sheet{position:fixed;left:10px;right:10px;bottom:calc(var(--tab) + var(--sb) + 10px);z-index:35;background:var(--ink);color:var(--bg);border-radius:20px;padding:16px;
+.sheet{position:fixed;left:10px;right:10px;bottom:calc(var(--tab) + var(--sb) + 84px);z-index:35;background:var(--ink);color:var(--bg);border-radius:20px;padding:16px;
   display:grid;gap:10px;box-shadow:0 20px 40px -20px var(--shadow);animation:rise .35s ease-out;max-width:540px;margin:0 auto}
 .sheet b{font-size:1rem}
 .sheet p{font-size:.92rem;opacity:.9}
@@ -406,7 +406,7 @@ function renderTop(){
   else if(V.tab==='route')title='Le parcours';else title="L'album";
   var seg=STEPS.map(function(s,i){var c=S.done[s.id]?'done':S.skipped[s.id]?'skip':(V.tab==='hunt'&&i===fi)?'here':'';
     return '<i class="'+c+'" style="--c:'+DAYCOLOR[s.day]+'"></i>';}).join('');
-  $('top').innerHTML='<div class="row"><span class="title">'+title+'</span><span class="score" id="score" aria-label="'+points()+' points"><span class="star">'+ic('star')+'</span>'+points()+'</span></div><div class="seg" aria-hidden="true">'+seg+'</div>';
+  $('top').innerHTML='<div class="bar"><span class="title">'+title+'</span><span class="score" id="score" aria-label="'+points()+' points"><span class="star">'+ic('star')+'</span>'+points()+'</span></div><div class="seg" aria-hidden="true">'+seg+'</div>';
 }
 
 function renderTabs(){
