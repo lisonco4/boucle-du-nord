@@ -47,7 +47,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font
 h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
 p{margin:0}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation}
-button:focus-visible,a:focus-visible,g[data-act]:focus-visible,label:focus-within{outline:3px solid var(--gold);outline-offset:2px;border-radius:12px}
+button:focus-visible,a:focus-visible,g[data-pin]:focus-visible,label:focus-within{outline:3px solid var(--gold);outline-offset:2px;border-radius:12px}
 svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .th{font-family:var(--thai);font-weight:400}
 .flags{display:block;width:100%;height:34px}
@@ -81,7 +81,25 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 110px);max-width:560px;margi
 .map svg.m{display:block;width:100%;height:auto}
 .map text{font-family:var(--body);fill:var(--muted)}
 .map .lab{font-family:var(--display);font-weight:700;fill:var(--ink);font-size:21px;paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round}
-.map g[data-act]{cursor:pointer}
+.map .vp{position:relative;aspect-ratio:620/600;touch-action:none;overflow:hidden;cursor:grab;-webkit-user-select:none;user-select:none}
+.map .vp:active{cursor:grabbing}
+.map svg.m{width:100%;height:100%}
+.map g[data-pin]{cursor:pointer}
+.mapctl{position:absolute;right:10px;top:10px;display:grid;gap:6px}
+.mapctl button{width:42px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;box-shadow:0 6px 14px -8px var(--shadow)}
+.mapctl button svg{width:20px;height:20px}
+.map.full{position:fixed;inset:0;z-index:25;border-radius:0;border:0;display:flex;flex-direction:column;padding-top:var(--st);padding-bottom:var(--sb)}
+.map.full .vp{flex:1;aspect-ratio:auto}
+.legend .hint{flex-basis:100%;font-weight:600;font-size:.74rem}
+.pinsheet{position:fixed;left:10px;right:10px;bottom:calc(var(--tab) + var(--sb) + 10px);z-index:30;max-width:540px;margin:0 auto;animation:rise .25s ease-out}
+.pin-in{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;gap:8px;box-shadow:0 24px 50px -24px var(--shadow)}
+.pin-in .k{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-right:40px}
+.pin-in h3{font-size:1.35rem}
+.pin-in p{color:var(--muted);font-size:.95rem}
+.pin-in img{width:100%;max-height:180px;object-fit:cover;border-radius:14px}
+.pin-in .x{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;background:var(--surface2);display:grid;place-items:center}
+.pin-in .x svg{width:18px;height:18px}
+.pin-in .primary{min-height:50px;margin-top:4px}
 .map .pulse{animation:pulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
 .map .bob{animation:bob 1.2s ease-in-out infinite}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px 14px;font-size:.78rem;font-weight:700;color:var(--muted)}
@@ -466,6 +484,10 @@ var IC={
  cave:'<path d="M3 20L9 6l3 5 2-3 7 12zM10 20a2.5 3 0 015 0"/>',
  flower:'<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5a3 3 0 110-6 3 3 0 110 6zM12 14.5a3 3 0 110 6 3 3 0 110-6zM9.5 12a3 3 0 11-6 0 3 3 0 116 0zM14.5 12a3 3 0 116 0 3 3 0 11-6 0z"/>',
  bag:'<path d="M6 8h12l1 12H5zM9 8V6a3 3 0 016 0v2M9 13h6"/>',
+ expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+ shrink:'<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
+ target:'<circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  hands:'<path d="M8 20c-2-2-3-4-3-7l1-5a1.5 1.5 0 013 0v4M9 12V5a1.5 1.5 0 013 0v7M12 11V6a1.5 1.5 0 013 0v6M15 11V8a1.5 1.5 0 013 0v5c0 3-1 5-3 7"/>'
 };
@@ -483,7 +505,7 @@ function fresh(){return {answer:{},done:{},skipped:{},photo:{},opened:{},check:{
 var S=fresh();
 try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-var V={tab:'map',focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
+var V={tab:'map',mapFull:false,focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
 var lastShown=null,fresh1=null; /* animare solo cio' che e' nuovo, non a ogni spunta */
 
 /* ---------- Calcoli ---------- */
@@ -569,32 +591,55 @@ function giftSvg(cls){
    '<rect x="12" y="36" width="96" height="20" rx="6" fill="var(--d1)"/><rect x="53" y="36" width="14" height="72" fill="var(--gold)"/>'+
    '<path d="M60 36c-8-18-30-20-30-8s22 8 30 8zm0 0c8-18 30-20 30-8s-22 8-30 8z" fill="none" stroke="var(--gold)" stroke-width="7" stroke-linejoin="round"/></svg>';
 }
+/* ---------- Mappa interattiva : pizzica per zoomare, trascina per muoverti, tocca i punti ---------- */
+var BASE={x:0,y:70,w:620,h:600},MV=null;
+var POI={
+ mekong:{t:'Il Mekong',d:"Nasce sull'altopiano tibetano e attraversa sei paesi prima di gettarsi nel mare, in Vietnam. Venerdì sera ci guardiamo il tramonto."},
+ myanmar:{t:'Myanmar',d:'È subito oltre il confine. In questo giro non si passa nessuna frontiera: si guarda da lontano.'},
+ laos:{t:'Laos',d:"Sull'altra riva del Mekong. Al Triangolo d'Oro le barche fanno tappa su un'isola-mercato laotiana: noi restiamo a terra."},
+ maesai:{t:'Mae Sai',d:'La città più a nord della Thailandia, attaccata al Myanmar. Sabato ci passiamo vicino senza entrare in centro.'},
+ maechan:{t:'Mae Chan',d:'Il crocevia del giro: ci passiamo venerdì, sabato e domenica. Al mercato, i banchi vegetariani con la bandiera gialla.'},
+ monti:{t:'Le montagne di Doi Mae Salong',d:'Strade ripide e nebbia al mattino. In discesa: freno dietro, freno motore e fanale acceso.'},
+ twins:{t:'Twins Farm · notte 1',d:'Camere in montagna con balcone sulle creste. La sera lucciole e stelle. Chiedi una coperta in più: fa freddo.'},
+ viewkhong:{t:'View Khong Hotel · notte 2',d:"Piccolo hotel sul Mekong, a 3 km dal Triangolo d'Oro. Colazione al VIEW CAFE dalle 7 alle 10."},
+ katiliya:{t:'Katiliya Park Villa · notte 3',d:'Ville in un grande parco con piscina e cigni. Il ristorante è in cima, con una navetta gratuita.'},
+ nord:{t:'Il Nord',d:'Il giro sale da Chiang Rai fino al confine con Myanmar e Laos, e poi torna giù. Circa 400 km in quattro giorni.'}
+};
+function vbStr(){var v=MV||BASE;return [v.x,v.y,v.w,v.h].map(function(n){return n.toFixed(1);}).join(' ');}
+function house(key,x,y){return '<g data-pin="p:'+key+'" role="button" tabindex="0" aria-label="'+esc(POI[key].t)+'"><circle cx="'+x+'" cy="'+y+'" r="26" fill="transparent"/>'+
+  '<circle cx="'+x+'" cy="'+y+'" r="15" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>'+
+  '<path d="M'+(x-7)+' '+(y+1)+' L'+x+' '+(y-7)+' L'+(x+7)+' '+(y+1)+' V'+(y+7)+' H'+(x-7)+'Z" fill="var(--gold)" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/></g>';}
+function town(key,x,y,name,dx){return '<g data-pin="p:'+key+'" role="button" tabindex="0" aria-label="'+esc(name)+'"><circle cx="'+x+'" cy="'+y+'" r="20" fill="transparent"/>'+
+  '<circle cx="'+x+'" cy="'+y+'" r="5" fill="var(--muted)"/><text x="'+(x+dx)+'" y="'+(y+5)+'" font-size="15" font-weight="700"'+(dx<0?' text-anchor="end"':'')+'>'+name+'</text></g>';}
 function mapSvg(){
-  var cur=currentIndex(),h='',pts=STEPS.filter(function(s){return s.x;});
-  h+='<svg class="m" viewBox="0 70 620 600" role="img" aria-label="Mappa del giro: le tappe scoperte sono segnate, le altre hanno un punto interrogativo">';
+  var cur=currentIndex(),h='';
+  h+='<svg class="m" id="msvg" viewBox="'+vbStr()+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mappa del giro: tocca i punti per i dettagli">';
   h+='<defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter></defs>';
-  h+='<path d="M568.7 20 L545 80 L526 125 L517.6 155 L528 200 L525 240 L549.8 290 L587.6 560 L600 660" fill="none" stroke="var(--river)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough)"/>';
-  h+='<path d="M303.8 55 L327.5 78 L370 90 L417.3 110 L474.1 135 L517.6 155" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" opacity=".7"/>';
+  h+='<g data-pin="p:mekong"><path d="M568.7 -200 L568.7 20 L545 80 L526 125 L517.6 155 L528 200 L525 240 L549.8 290 L587.6 560 L600 900" fill="none" stroke="var(--river)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough)"/>'+
+     '<text x="556" y="350" font-size="19" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text></g>';
+  h+='<path d="M120 40 L240 60 L303.8 55 L327.5 78 L370 90 L417.3 110 L474.1 135 L517.6 155" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" opacity=".7"/>';
   [[30,230],[54,216],[150,240],[174,226],[24,420],[54,436],[196,140],[220,126],[180,450],[150,480],[390,250],[414,236],[110,560],[136,546],[340,420],[364,406]].forEach(function(m){
-    h+='<path d="M'+m[0]+' '+m[1]+' l12 -18 l12 18" fill="none" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';});
-  /* piccole risaie e alberi */
+    h+='<g data-pin="p:monti"><circle cx="'+(m[0]+12)+'" cy="'+(m[1]-8)+'" r="16" fill="transparent"/><path d="M'+m[0]+' '+m[1]+' l12 -18 l12 18" fill="none" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>';});
   [[420,470],[460,520],[380,560],[200,520]].forEach(function(r){h+='<path d="M'+r[0]+' '+r[1]+'h40M'+r[0]+' '+(r[1]+8)+'h40M'+r[0]+' '+(r[1]+16)+'h40" stroke="var(--line)" stroke-width="2" stroke-linecap="round"/>';});
-  h+='<text x="170" y="104" font-size="17" font-weight="700" letter-spacing="3">MYANMAR</text>';
-  h+='<text x="574" y="420" font-size="17" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text>';
-  h+='<text x="556" y="350" font-size="19" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text>';
+  h+='<g data-pin="p:myanmar"><rect x="160" y="84" width="140" height="28" fill="transparent"/><text x="170" y="104" font-size="17" font-weight="700" letter-spacing="3">MYANMAR</text></g>';
+  h+='<g data-pin="p:laos"><rect x="560" y="400" width="34" height="80" fill="transparent"/><text x="574" y="420" font-size="17" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text></g>';
   h+='<text x="24" y="646" font-size="14" font-weight="700" letter-spacing="2">10 km</text><path d="M24 654h95" stroke="var(--muted)" stroke-width="2"/>';
-  h+='<g transform="translate(60 130)"><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
+  h+='<g data-pin="p:nord" transform="translate(60 130)"><circle r="26" fill="transparent"/><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
+  h+=town('maesai',326,82,'Mae Sai',-10)+town('maechan',300,364,'Mae Chan',10);
   /* strada scoperta */
   var lastI=cur<0?STEPS.length-1:cur,prev=null;
   for(var i=0;i<=lastI;i++){var b=STEPS[i];if(!b.x)continue;
     if(prev){var ahead=(i===lastI&&cur>=0);
       h+='<path d="M'+prev.x+' '+prev.y+' L'+b.x+' '+b.y+'" stroke="'+DAYCOLOR[b.day]+'" stroke-width="'+(ahead?3:6)+'" stroke-linecap="round" fill="none"'+(ahead?' stroke-dasharray="1 9"':'')+' filter="url(#rough)"/>';}
     prev=b;}
+  h+=house('twins',40,372)+house('viewkhong',592,224)+house('katiliya',222,342);
   var labels='',moto='';
+  function scooterAt(x,y){return '<g class="bob" aria-hidden="true"><g transform="translate('+(x+8)+' '+(y-58)+')"><circle cx="18" cy="18" r="20" fill="var(--ink)"/>'+
+    '<g transform="translate(6 6)" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC.scooter+'</g></g></g>';}
   STEPS.forEach(function(s,i){
     if(!s.x)return;
     var done=!!S.done[s.id],skip=!!S.skipped[s.id],here=i===cur,c=DAYCOLOR[s.day];
-    h+='<g data-act="goto" data-i="'+i+'" role="button" tabindex="0" aria-label="Tappa '+i+(done?': '+esc(s.short):': da scoprire')+'">';
+    h+='<g data-pin="s:'+i+'" role="button" tabindex="0" aria-label="Tappa '+i+(done?': '+esc(s.short):': da scoprire')+'">';
     h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="32" fill="transparent"/>';
     if(here)h+='<circle class="pulse" cx="'+s.x+'" cy="'+s.y+'" r="20" fill="'+c+'"/>';
     if(done){
@@ -603,8 +648,7 @@ function mapSvg(){
     }else if(here){
       h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="20" fill="var(--surface)" stroke="'+c+'" stroke-width="5"/>';
       h+='<text x="'+s.x+'" y="'+(s.y+7)+'" text-anchor="middle" font-size="19" font-weight="800" style="fill:var(--ink)">'+i+'</text>';
-      moto='<g class="bob" aria-hidden="true"><g transform="translate('+(s.x+8)+' '+(s.y-58)+')"><circle cx="18" cy="18" r="20" fill="var(--ink)"/>'+
-        '<g transform="translate(6 6)" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC.scooter+'</g></g></g>';
+      moto=scooterAt(s.x,s.y);
     }else{
       h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="19" fill="var(--surface)" stroke="var(--muted)" stroke-width="2.5" stroke-dasharray="4 4" opacity="'+(skip?.5:1)+'"/>';
       h+='<text x="'+s.x+'" y="'+(s.y+8)+'" text-anchor="middle" font-size="23" font-weight="700" style="font-family:var(--display)">'+(skip?'–':'?')+'</text>';
@@ -612,13 +656,108 @@ function mapSvg(){
     h+='</g>';
     if(done||s.id==='retour')labels+='<text class="lab" x="'+(s.x+s.lx)+'" y="'+(s.y+s.ly)+'" text-anchor="'+s.anc+'">'+esc(s.short)+'</text>';
   });
-  if(cur>=0&&!STEPS[cur].x){var cr=STEPS[STEPS.length-1];moto='<g class="bob" aria-hidden="true"><g transform="translate('+(cr.x+8)+' '+(cr.y-58)+')"><circle cx="18" cy="18" r="20" fill="var(--ink)"/><g transform="translate(6 6)" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC.scooter+'</g></g></g>';}
+  if(cur>=0&&!STEPS[cur].x){var cr=STEPS[STEPS.length-1];moto=scooterAt(cr.x,cr.y);}
   return h+labels+moto+'</svg>';
+}
+function mapBox(){
+  return '<div class="map'+(V.mapFull?' full':'')+'" id="mapbox"><div class="vp" id="vp">'+mapSvg()+
+    '<div class="mapctl"><button data-m="full" aria-label="'+(V.mapFull?'Chiudi schermo intero':'Schermo intero')+'">'+ic(V.mapFull?'shrink':'expand')+'</button>'+
+    '<button data-m="in" aria-label="Zoom avanti">'+ic('plus')+'</button><button data-m="out" aria-label="Zoom indietro">'+ic('minus')+'</button>'+
+    '<button data-m="fit" aria-label="Vedi tutta la mappa">'+ic('target')+'</button></div></div>'+
+    '<div class="legend"><span><i style="background:var(--d1)"></i>Gio</span><span><i style="background:var(--d2)"></i>Ven</span><span><i style="background:var(--d3)"></i>Sab</span><span><i style="background:var(--d4)"></i>Dom</span><span><i style="border:2px dashed var(--muted)"></i>Da scoprire</span><span><i style="background:var(--gold);border-radius:3px"></i>Hotel</span>'+
+    '<span class="hint">Pizzica per zoomare · trascina · tocca i punti</span></div></div>';
+}
+function bindMap(){
+  var vp=$('vp'),svg=$('msvg');if(!vp||!svg)return;
+  var r0=vp.getBoundingClientRect();if(!r0.width)return;
+  BASE={x:0,w:620,h:620*r0.height/r0.width};BASE.y=370-BASE.h/2;
+  if(!MV||Math.abs(MV.h/MV.w-BASE.h/BASE.w)>.01)MV={x:BASE.x,y:BASE.y,w:BASE.w,h:BASE.h};
+  function clamp(v){var w=Math.min(BASE.w,Math.max(BASE.w/6,v.w)),h=w*BASE.h/BASE.w;
+    return {w:w,h:h,x:Math.min(BASE.x+BASE.w-w,Math.max(BASE.x,v.x)),y:Math.min(BASE.y+BASE.h-h,Math.max(BASE.y,v.y))};}
+  function apply(){MV=clamp(MV);svg.setAttribute('viewBox',vbStr());}
+  function rect(){return svg.getBoundingClientRect();}
+  function zoomAt(cx,cy,f){var r=rect(),ax=MV.x+(cx-r.left)/r.width*MV.w,ay=MV.y+(cy-r.top)/r.height*MV.h;
+    var w=Math.min(BASE.w,Math.max(BASE.w/6,MV.w/f)),h=w*BASE.h/BASE.w;
+    MV={x:ax-(cx-r.left)/r.width*w,y:ay-(cy-r.top)/r.height*h,w:w,h:h};apply();}
+  apply();
+  var P={},st=null,moved=false,t0=0,lastTap=0;
+  function pts(){return Object.keys(P).map(function(k){return P[k];});}
+  function startFrom(){var a=pts();if(a.length>=2){var m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};
+      st={pinch:true,d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),m:m,vb:Object.assign({},MV)};}
+    else if(a.length===1)st={x:a[0].x,y:a[0].y,vb:Object.assign({},MV)};}
+  vp.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.mapctl'))return;
+    try{vp.setPointerCapture(e.pointerId);}catch(_){}
+    P[e.pointerId]={x:e.clientX,y:e.clientY};
+    if(pts().length===1){moved=false;t0=Date.now();}else moved=true;
+    startFrom();
+  });
+  vp.addEventListener('pointermove',function(e){
+    if(!P[e.pointerId]||!st)return;P[e.pointerId]={x:e.clientX,y:e.clientY};
+    var r=rect(),a=pts();
+    if(st.pinch&&a.length>=2){
+      var d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),m={x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2};
+      var ax=st.vb.x+(st.m.x-r.left)/r.width*st.vb.w,ay=st.vb.y+(st.m.y-r.top)/r.height*st.vb.h;
+      var w=Math.min(BASE.w,Math.max(BASE.w/6,st.vb.w*st.d/Math.max(d,1))),h=w*BASE.h/BASE.w;
+      MV={x:ax-(m.x-r.left)/r.width*w,y:ay-(m.y-r.top)/r.height*h,w:w,h:h};apply();
+    }else if(!st.pinch){
+      var dx=e.clientX-st.x,dy=e.clientY-st.y;if(Math.hypot(dx,dy)>6)moved=true;
+      if(moved){MV={x:st.vb.x-dx/r.width*st.vb.w,y:st.vb.y-dy/r.height*st.vb.h,w:st.vb.w,h:st.vb.h};apply();}
+    }
+  });
+  function end(e){
+    if(!P[e.pointerId])return;delete P[e.pointerId];
+    if(pts().length){startFrom();return;}
+    st=null;
+    if(!moved&&Date.now()-t0<500){
+      var el=document.elementFromPoint(e.clientX,e.clientY),pin=el&&el.closest&&el.closest('[data-pin]');
+      if(pin){openPin(pin.getAttribute('data-pin'));lastTap=0;}
+      else{closePin();var now=Date.now();if(now-lastTap<320){zoomAt(e.clientX,e.clientY,2);lastTap=0;}else lastTap=now;}
+    }
+  }
+  vp.addEventListener('pointerup',end);vp.addEventListener('pointercancel',end);
+  vp.addEventListener('wheel',function(e){e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*.0015));},{passive:false});
+  vp.querySelector('.mapctl').addEventListener('click',function(e){
+    var b=e.target.closest('[data-m]');if(!b)return;var m=b.getAttribute('data-m'),r=rect();
+    if(m==='in')zoomAt(r.left+r.width/2,r.top+r.height/2,1.6);
+    else if(m==='out')zoomAt(r.left+r.width/2,r.top+r.height/2,1/1.6);
+    else if(m==='fit'){MV=null;bindMapRefresh();}
+    else if(m==='full'){V.mapFull=!V.mapFull;MV=null;closePin();render();}
+  });
+}
+function bindMapRefresh(){var svg=$('msvg');if(!svg)return;MV={x:BASE.x,y:BASE.y,w:BASE.w,h:BASE.h};svg.setAttribute('viewBox',vbStr());}
+
+/* scheda in basso quando si tocca un punto */
+function closePin(){var o=document.querySelector('.pinsheet');if(o)o.remove();}
+function openPin(key){
+  closePin();var kind=key.split(':')[0],id=key.split(':')[1],h='',cls='';
+  if(kind==='p'){var p=POI[id];if(!p)return;h='<span class="k">Sulla mappa</span><h3>'+esc(p.t)+'</h3><p>'+esc(p.d)+'</p>';}
+  else{
+    var i=+id,s=STEPS[i],cur=currentIndex(),done=!!S.done[s.id],skip=!!S.skipped[s.id],open=unlocked(i);
+    cls=' style="--c:'+DAYCOLOR[s.day]+'"';
+    h='<span class="k"><span class="dot"></span>Tappa '+i+' · '+esc(s.when)+'</span>';
+    if(done){
+      h+='<h3>'+esc(s.place)+'</h3>'+(S.photo[s.id]?'<img data-photo="'+s.id+'" alt="">':'')+
+        '<p>'+stepPoints(s)+' foglie raccolte · '+s.km+' km in scooter</p>';
+    }else if(i===cur){
+      h+='<h3>Prossima tappa</h3><p>'+esc(s.ride)+'</p>';
+    }else if(open||skip){
+      h+='<h3>'+(skip?'Tappa saltata':'Tappa aperta in anticipo')+'</h3><p>'+esc(s.ride)+'</p>';
+    }else{
+      h+='<h3>Da scoprire</h3><p>Si sblocca quando hai convalidato la tappa '+(i-1)+'. Niente spoiler.</p>';
+    }
+    h+='<button class="primary'+(done?' alt':'')+'" data-act="goto" data-i="'+i+'">'+(done?'Rivedi la tappa':i===cur?'Vai alla tappa':'Apri la tappa')+ic('arrow')+'</button>';
+  }
+  var d=document.createElement('div');d.className='pinsheet';d.setAttribute('role','dialog');d.setAttribute('aria-label','Dettagli');
+  d.innerHTML='<div'+cls+' class="pin-in"><button class="x" aria-label="Chiudi">'+ic('x')+'</button>'+h+'</div>';
+  $('layer').appendChild(d);hydrate(d);
+  d.querySelector('.x').addEventListener('click',closePin);
+  d.addEventListener('click',function(e){if(e.target.closest('[data-act]'))closePin();});
 }
 
 /* ---------- Rendering ---------- */
 var $=function(id){return document.getElementById(id);};
-function render(){cupN=0;renderTop();renderMain();renderCta();renderTabs();}
+function render(){cupN=0;closePin();renderTop();renderMain();renderCta();renderTabs();}
 
 function renderTop(){
   var fi=focusIndex(),title;
@@ -633,7 +772,7 @@ function renderTabs(){
   $('tabs').innerHTML=t.map(function(x){return '<button data-act="tab" data-tab="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'><span class="ic">'+ic(x[1])+
     (x[0]==='album'&&n?'<span class="badge">'+n+'</span>':'')+'</span>'+x[2]+'</button>';}).join('');
 }
-function renderMain(){var m=$('main');if(V.tab!=='hunt')lastShown=null;m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();fresh1=null;hydrate(m);}
+function renderMain(){var m=$('main');if(V.tab!=='hunt')lastShown=null;m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();fresh1=null;hydrate(m);if(V.tab==='map')bindMap();}
 
 function voucher(){
   var p=points(),w=won(),reach=p+remaining();
@@ -648,7 +787,7 @@ function mapView(){
   var p=points(),k=level(p),next=LEVELS[k+1],got=earned(),km=kmDone(),done=STEPS.filter(function(s){return s.x&&S.done[s.id];}).length;
   var digits=String(km).padStart(3,'0').split('').map(function(d){return '<b>'+d+'</b>';}).join('');
   var h='<div class="maphead">'+flags(16)+'<h1>La caccia <em>di Ugo</em></h1><p>'+done+' luoghi scoperti su '+STEPS.filter(function(s){return s.x;}).length+' · tocca un punto della mappa</p></div>';
-  h+='<div class="map">'+mapSvg()+'<div class="legend"><span><i style="background:var(--d1)"></i>Gio</span><span><i style="background:var(--d2)"></i>Ven</span><span><i style="background:var(--d3)"></i>Sab</span><span><i style="background:var(--d4)"></i>Dom</span><span><i style="border:2px dashed var(--muted)"></i>Da scoprire</span></div></div>';
+  h+=mapBox();
   h+='<section class="sect">'+voucher()+'</section>';
   h+='<section class="sect"><h2>Contachilometri</h2><div class="panel odo"><span class="digits">'+digits+'</span><span class="u"><b>km in scooter</b>su circa '+TOTKM+' km di giro</span></div></section>';
   h+='<section class="sect"><h2>La tua tazza di tè</h2><div class="panel cupbox">'+cupSvg(p)+'<div><div class="lvl">'+LEVELS[k][1]+'</div>'+
@@ -774,7 +913,7 @@ function renderCta(){
 
 /* ---------- Azioni ---------- */
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
-document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g[data-act]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('g[data-pin]')){e.preventDefault();openPin(e.target.getAttribute('data-pin'));}if(e.key==='Escape'){closePin();if(V.mapFull){V.mapFull=false;MV=null;render();}}});
 document.addEventListener('change',function(e){
   var id=e.target.getAttribute&&e.target.getAttribute('data-ck');if(!id)return;
   if(e.target.checked)S.check[id]=true;else delete S.check[id];save();buzz(8);

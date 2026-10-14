@@ -1,5 +1,5 @@
 // Met tout en cache à la première visite : le carnet et la chasse marchent ensuite sans réseau.
-const CACHE = 'boucle-du-nord-v7';
+const CACHE = 'boucle-du-nord-v8';
 const FILES = ['./', './index.html', './chasse.html', './carnet.webmanifest', './chasse.webmanifest',
   './fonts/fonts.css', './fonts/fraunces.woff2', './fonts/fraunces-italic.woff2', './fonts/manrope.woff2',
   './icons/carnet-180.png', './icons/carnet-192.png', './icons/carnet-512.png',
