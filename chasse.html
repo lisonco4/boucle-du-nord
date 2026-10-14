@@ -75,7 +75,7 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 104px);max-width:560px;margi
 .map{background:var(--paper);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 18px 40px -30px var(--shadow)}
 .map svg{display:block;width:100%;height:auto}
 .map text{font-family:var(--body);fill:var(--muted)}
-.map .lab{font-family:var(--display);font-weight:600;fill:var(--ink);font-size:15px;paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+.map .lab{font-family:var(--display);font-weight:700;fill:var(--ink);font-size:21px;paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round}
 .map g[data-act]{cursor:pointer}
 .map .pulse{animation:pulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px 14px;font-size:.78rem;font-weight:700;color:var(--muted)}
@@ -265,82 +265,82 @@ input[type=file]{position:fixed;left:-9999px;width:1px;height:1px;opacity:0}
 <script>
 /* ---------- Tappe : domanda a scelta multipla (a = indice della risposta giusta) ---------- */
 var STEPS=[
- {id:'lalitta',day:1,when:'Giovedì 15 · 9:30',x:258,y:568,lx:-18,ly:5,anc:'end',short:'Lalitta Café',
+ {id:'lalitta',day:1,when:'Giovedì 15 · 9:30',x:250,y:560,lx:-30,ly:7,anc:'end',short:'Lalitta Café',
   q:"Al Lalitta Café, in cosa si trasforma il biglietto d'ingresso da 60 ฿?",o:['In un dolce','In una bevanda','In una cartolina',"In un'offerta al tempio"],a:1,
   f:"Il giardino è ispirato alla foresta mitica di Himmapan.",
   place:'Lalitta Café',about:"Un caffè-giardino con cascate, ponti di pietra e sculture ovunque. Colazione in mezzo all'acqua.",
   mission:'Voi due davanti a una cascata.',maps:'https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai'},
- {id:'patueng',day:1,when:'Giovedì 15 · 11:45',x:247,y:390,lx:-18,ly:5,anc:'end',short:'Pa Tueng',
+ {id:'patueng',day:1,when:'Giovedì 15 · 11:45',x:247,y:390,lx:-30,ly:7,anc:'end',short:'Pa Tueng',
   q:"Cosa cuoce la gente del posto nell'acqua più calda delle sorgenti di Pa Tueng?",o:['Il riso','Le pannocchie','Le uova','Il tè'],a:2,
   f:"Il geyser spruzza l'acqua a una decina di metri d'altezza.",
   place:'Pa Tueng Hot Springs',about:"Un geyser in un piccolo parco e vasche gratuite dove si immergono i piedi. Un po' di odore di zolfo.",
   mission:'I vostri quattro piedi nella stessa vasca.',maps:'https://www.google.com/maps/search/?api=1&query=Pa+Tueng+Hot+Springs&query_place_id=ChIJG_i8gDr81jAROG8mZbGQzWU'},
- {id:'xinshidai',day:1,when:'Giovedì 15 · 13:30',x:95,y:337,lx:0,ly:32,anc:'middle',short:'Xin Shi Dai',
+ {id:'xinshidai',day:1,when:'Giovedì 15 · 13:30',x:90,y:345,lx:0,ly:46,anc:'middle',short:'Xin Shi Dai',
   q:"Da quanto tempo esiste la panetteria Xin Shi Dai di Mae Salong?",o:['Da più di 50 anni','Da 5 anni','Da 150 anni',"Dall'anno scorso"],a:0,
   f:"Tutto è fatto in casa con burro vero.",
   place:'Xin Shi Dai Bakery',about:"Panetteria di famiglia a Mae Salong. Pizza dello Yunnan, tempura, onion rings, e il rotolo alla vaniglia.",
   mission:'Il rotolo alla vaniglia, prima del primo morso.',maps:'https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI'},
- {id:'maesalong',day:1,when:'Giovedì 15 · 15:30',x:124,y:312,lx:18,ly:5,anc:'start',short:'Mae Salong',
+ {id:'maesalong',day:1,when:'Giovedì 15 · 15:30',x:140,y:318,lx:30,ly:7,anc:'start',short:'Mae Salong',
   q:"Chi ha fondato il villaggio di Mae Salong dopo il 1949?",o:['Monaci tibetani','Mercanti inglesi','Soldati cinesi nazionalisti','Pescatori del Mekong'],a:2,
   f:"I loro figli hanno sostituito l'oppio con il tè oolong.",
   place:'Il villaggio di Mae Salong',about:"Il museo dei Martiri cinesi, la tomba del generale Tuan e la via delle case del tè, dove la degustazione è gratis.",
   mission:"Un brindisi con due tazzine di oolong.",maps:'https://www.google.com/maps/search/?api=1&query=Chinese+Martyrs+Memorial+Museum+Mae+Salong'},
- {id:'sunset1',day:1,when:'Giovedì 15 · 17:15',x:70,y:318,lx:-18,ly:5,anc:'end',short:'Tramonto',
+ {id:'sunset1',day:1,when:'Giovedì 15 · 17:15',x:50,y:312,lx:0,ly:-30,anc:'middle',short:'Tramonto',
   q:"A che ora tramonta il sole sulle piantagioni di Mae Salong a metà ottobre?",o:['Verso le 16:15','Verso le 17:50','Verso le 19:30','Verso le 20:45'],a:1,
   f:"Al buio, spegnete la luce del balcone: si vedono le lucciole.",
   place:'Tramonto sulle piantagioni',about:"Dalla terrazza di Mae Salong Flower Hills, oppure dal balcone di Twins Farm.",
   mission:'Le vostre due silhouette davanti al tramonto.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag'},
- {id:'marche',day:2,when:'Venerdì 16 · 7:00',x:100,y:270,lx:0,ly:-20,anc:'middle',short:'Mercato',
+ {id:'marche',day:2,when:'Venerdì 16 · 7:00',x:100,y:262,lx:0,ly:-30,anc:'middle',short:'Mercato',
   q:"Qual è la colazione tipica al mercato del mattino di Mae Salong?",o:['Cappuccino e cornetto','Latte di soia caldo e frittelle cinesi','Riso al mango','Pho vietnamita'],a:1,
   f:"Il grosso del mercato succede prima delle 8.",
   place:'Il mercato del mattino',about:"Gli Akha scendono dalle montagne con erbe, funghi e tè. Dite « jay » per la versione senza carne.",
   mission:'Latte di soia e frittelle, tenuti dalle vostre mani.',maps:'https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok'},
- {id:'triangle',day:2,when:'Venerdì 16 · 15:35',x:516,y:132,lx:0,ly:-20,anc:'middle',short:"Triangolo d'Oro",
+ {id:'triangle',day:2,when:'Venerdì 16 · 15:35',x:516,y:128,lx:0,ly:-30,anc:'middle',short:"Triangolo d'Oro",
   q:"Quali paesi si guardano al Triangolo d'Oro?",o:['Thailandia, Cambogia, Vietnam','Thailandia, Laos, Cina','Thailandia, Laos, Myanmar','Thailandia, Myanmar, India'],a:2,
   f:"Il fiume Ruak si getta nel Mekong proprio qui, a Sop Ruak.",
   place:"Il Triangolo d'Oro",about:"Tre paesi uno di fronte all'altro, sotto un grande Buddha dorato in riva all'acqua. Restate a terra: le barche fanno tappa in Laos.",
   mission:'I tre paesi in una sola foto, con voi due davanti.',maps:'https://www.google.com/maps/search/?api=1&query=Golden+Triangle+Park+Sop+Ruak'},
- {id:'chiangsaen',day:2,when:'Venerdì 16 · 16:10',x:517,y:235,lx:18,ly:5,anc:'start',short:'Chiang Saen',
+ {id:'chiangsaen',day:2,when:'Venerdì 16 · 16:10',x:517,y:240,lx:30,ly:7,anc:'start',short:'Chiang Saen',
   q:"Il tempio Wat Pa Sak di Chiang Saen si trova in mezzo a una foresta di…",o:['Bambù','Teak','Pini','Banani'],a:1,
   f:"Chiang Saen è stata una capitale del regno Lanna. Wat Pa Sak chiude alle 17.",
   place:'Wat Pa Sak, Chiang Saen',about:"Templi in mattoni avvolti dagli alberi, e il chedi di 58 metri di Wat Phra That Chedi Luang. Spalle e ginocchia coperte.",
   mission:"Una foto in cui un albero sembra più vecchio del tempio.",maps:'https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen'},
- {id:'mekong',day:2,when:'Venerdì 16 · 17:25',x:548,y:180,lx:18,ly:5,anc:'start',short:'Mekong',
+ {id:'mekong',day:2,when:'Venerdì 16 · 17:25',x:556,y:178,lx:-4,ly:46,anc:'middle',short:'Mekong',
   q:"Davanti all'hotel, sull'altra riva del Mekong, quale paese c'è?",o:['Il Myanmar','La Cina','Il Laos','La Cambogia'],a:2,
   f:"Il sole tramonta alle vostre spalle, ma il cielo diventa rosa sopra il Laos.",
   place:'Tramonto sul Mekong',about:"Dalla riva davanti al View Khong Hotel, o in terrazza al Golden Time accanto.",
   mission:"Il cielo rosa sul Mekong, con voi due nell'inquadratura.",maps:'https://www.google.com/maps/search/?api=1&query=View+Khong+Hotel+Chiang+Saen&query_place_id=ChIJRwg_3PFD1jARU9CsnZKqjAY'},
- {id:'opium',day:3,when:'Sabato 17 · 10:00',x:490,y:170,lx:-18,ly:5,anc:'end',short:'Hall of Opium',
+ {id:'opium',day:3,when:'Sabato 17 · 10:00',x:480,y:172,lx:-30,ly:7,anc:'end',short:'Hall of Opium',
   q:"Come si entra nel museo Hall of Opium?",o:['In barca','Da un lungo tunnel buio','Con un ascensore panoramico','Da una grotta con le scimmie'],a:1,
   f:"Il museo spiega perché il tè e il caffè hanno sostituito il papavero in queste montagne.",
   place:'Hall of Opium',about:"Il miglior museo del nord della Thailandia, creato da una fondazione reale. Calcolate 1h45.",
   mission:"Voi due all'ingresso del museo (dentro le foto non sono sempre permesse).",maps:'https://www.google.com/maps/search/?api=1&query=Hall+of+Opium+Golden+Triangle+Park'},
- {id:'thampla',day:3,when:'Sabato 17 · 13:00',x:306,y:181,lx:18,ly:5,anc:'start',short:'Tham Pla',
+ {id:'thampla',day:3,when:'Sabato 17 · 13:00',x:306,y:181,lx:30,ly:7,anc:'start',short:'Tham Pla',
   q:"All'ingresso di Wat Tham Pla, la grotta delle scimmie, cosa conviene prendere?",o:['Delle banane per le scimmie','Un ombrello','Un bastone di bambù','Un casco'],a:2,
   f:"Si batte il bastone per terra se una scimmia insiste. Niente in mano, borsa chiusa, occhiali in tasca.",
   place:'Wat Tham Pla',about:"Un tempio rosso e oro contro la falesia, una sorgente piena di pesci enormi e un santuario in cima alle scale.",
   mission:'Una scimmia e voi due nella stessa foto, a distanza di sicurezza.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE'},
- {id:'chouifong',day:3,when:'Sabato 17 · 14:20',x:263,y:310,lx:18,ly:5,anc:'start',short:'Choui Fong',
+ {id:'chouifong',day:3,when:'Sabato 17 · 14:20',x:263,y:310,lx:30,ly:7,anc:'start',short:'Choui Fong',
   q:"In che anno è nata la piantagione di tè Choui Fong?",o:['1890','1955','1977','2005'],a:2,
   f:"Oggi sono 160 ettari di terrazze a onde sulle colline.",
   place:'Choui Fong Tea',about:"Passeggiata libera tra i filari, degustazione al negozio e caffè con vetrata sulle piantagioni. Famoso l'oolong all'osmanto.",
   mission:'Un dolce al matcha, con le piantagioni dietro.',maps:'https://www.google.com/maps/search/?api=1&query=Choui+Fong+Tea+Plantation&query_place_id=ChIJg_wdGB_51jARo1fdwwocqUg'},
- {id:'maesalongnai',day:3,when:'Sabato 17 · 17:15',x:190,y:262,lx:0,ly:-20,anc:'middle',short:'Mae Salong Nai',
+ {id:'maesalongnai',day:3,when:'Sabato 17 · 17:15',x:195,y:258,lx:0,ly:-30,anc:'middle',short:'Mae Salong Nai',
   q:"Cosa si vede dal belvedere di Mae Salong Nai?",o:['Il mare','Le montagne da entrambi i lati della cresta',"Il Triangolo d'Oro",'Bangkok in lontananza'],a:1,
   f:"La sera non sale quasi nessuno: è il tramonto più alto del viaggio.",
   place:'Belvedere di Mae Salong Nai',about:"18 km di salita sulla strada 1130. Al ritorno, piano e fanale acceso, con la cena al Cave lungo la strada.",
   mission:'Voi due, con le montagne da entrambi i lati.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Nai+Viewpoint&query_place_id=ChIJ06zaqvLl1jARxJ21tzkExdA'},
- {id:'doitung',day:4,when:'Domenica 18 · 10:00',x:256,y:222,lx:0,ly:-20,anc:'middle',short:'Doi Tung',
+ {id:'doitung',day:4,when:'Domenica 18 · 10:00',x:256,y:212,lx:-30,ly:7,anc:'end',short:'Doi Tung',
   q:"Con cosa ha sostituito il papavero la principessa madre a Doi Tung?",o:['Riso e mais','Tabacco','Caffè, macadamia e artigianato','Vigneti'],a:2,
   f:"La sua villa sembra uno chalet svizzero.",
   place:'Doi Tung',about:"La villa reale e i giardini di Mae Fah Luang, tra i più belli del paese, fioriti tutto l'anno. Assaggiate il caffè Doi Tung.",
   mission:'Voi due nei giardini, con più fiori possibile.',maps:'https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ'},
- {id:'bigbuddha',day:4,when:'Domenica 18 · 14:50',x:306,y:574,lx:18,ly:5,anc:'start',short:'Big Buddha',
+ {id:'bigbuddha',day:4,when:'Domenica 18 · 14:50',x:306,y:574,lx:30,ly:7,anc:'start',short:'Big Buddha',
   q:"Di che colore è la statua gigante di Wat Huay Pla Kang?",o:['Dorata','Bianca','Rossa','Verde giada'],a:1,
   f:"Tutti la chiamano Big Buddha, ma è Guanyin, dea della misericordia: 69 metri, e un ascensore sale fino alla testa.",
   place:'Wat Huay Pla Kang',about:"Ascensore 40 ฿, biglietti fino alle 18. Accanto, una pagoda di nove piani con scale a forma di drago.",
   mission:'La vista dalla testa, oppure voi due minuscoli davanti alla statua.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Huay+Pla+Kang&query_place_id=ChIJE7rdqpsG1zAR64zTj5CGWiw'},
- {id:'retour',day:4,when:'Domenica 18 · 16:15',x:285,y:606,lx:0,ly:32,anc:'middle',short:'Chiang Rai',
+ {id:'retour',day:4,when:'Domenica 18 · 16:15',x:280,y:620,lx:0,ly:46,anc:'middle',short:'Chiang Rai',
   q:"Cosa si mangia da Kunda, l'ultima sera a Chiang Rai?",o:['Sushi','Pizza al forno a legna','Burger vegani','Kebab'],a:2,
   f:"Ultima sera del festival vegetariano. Kunda è aperto fino alle 19:30, solo contanti.",
   place:'Ritorno a Chiang Rai',about:"Si riconsegna lo scooter. Il giro è chiuso.",
@@ -455,17 +455,17 @@ function cupSvg(p,cls){
 
 function mapSvg(){
   var cur=currentIndex(),h='';
-  h+='<svg viewBox="0 0 620 660" role="img" aria-label="Mappa del giro: le tappe scoperte sono segnate, le altre hanno un punto interrogativo">';
+  h+='<svg viewBox="0 70 620 600" role="img" aria-label="Mappa del giro: le tappe scoperte sono segnate, le altre hanno un punto interrogativo">';
   h+='<defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter></defs>';
   h+='<path d="M568.7 20 L545 80 L526 125 L517.6 155 L528 200 L525 240 L549.8 290 L587.6 560 L600 660" fill="none" stroke="var(--river)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#rough)"/>';
   h+='<path d="M303.8 55 L327.5 78 L370 90 L417.3 110 L474.1 135 L517.6 155" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round" opacity=".7"/>';
   [[30,230],[54,216],[150,240],[174,226],[24,420],[54,436],[196,140],[220,126],[180,450],[150,480],[390,250],[414,236],[110,560],[136,546],[340,420],[364,406]].forEach(function(m){
     h+='<path d="M'+m[0]+' '+m[1]+' l12 -18 l12 18" fill="none" stroke="var(--line)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';});
-  h+='<text x="380" y="56" font-size="13" font-weight="700" letter-spacing="3">MYANMAR</text>';
-  h+='<text x="574" y="420" font-size="13" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text>';
-  h+='<text x="556" y="350" font-size="14" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text>';
-  h+='<text x="24" y="636" font-size="11" font-weight="700" letter-spacing="2">10 km</text><path d="M24 644h95" stroke="var(--muted)" stroke-width="2"/>';
-  h+='<g transform="translate(66 70)"><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
+  h+='<text x="370" y="96" font-size="17" font-weight="700" letter-spacing="3">MYANMAR</text>';
+  h+='<text x="574" y="420" font-size="17" font-weight="700" letter-spacing="3" transform="rotate(80 574 420)">LAOS</text>';
+  h+='<text x="556" y="350" font-size="19" font-style="italic" style="font-family:var(--display);fill:var(--d3)" transform="rotate(78 556 350)">Mekong</text>';
+  h+='<text x="24" y="646" font-size="14" font-weight="700" letter-spacing="2">10 km</text><path d="M24 654h95" stroke="var(--muted)" stroke-width="2"/>';
+  h+='<g transform="translate(60 130)"><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
   var last=cur<0?STEPS.length-1:cur;
   for(var i=1;i<=last;i++){var a=STEPS[i-1],b=STEPS[i],ahead=(i===last&&cur>=0);
     h+='<path d="M'+a.x+' '+a.y+' L'+b.x+' '+b.y+'" stroke="'+DAYCOLOR[b.day]+'" stroke-width="'+(ahead?3:5)+'" stroke-linecap="round" fill="none"'+(ahead?' stroke-dasharray="1 9"':'')+' filter="url(#rough)"/>';}
@@ -473,17 +473,17 @@ function mapSvg(){
   STEPS.forEach(function(s,i){
     var done=!!S.done[s.id],skip=!!S.skipped[s.id],here=i===cur,c=DAYCOLOR[s.day];
     h+='<g data-act="goto" data-i="'+i+'" role="button" tabindex="0" aria-label="Tappa '+(i+1)+(done?': '+esc(s.short):': da scoprire')+'">';
-    h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="22" fill="transparent"/>';
-    if(here)h+='<circle class="pulse" cx="'+s.x+'" cy="'+s.y+'" r="14" fill="'+c+'"/>';
+    h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="32" fill="transparent"/>';
+    if(here)h+='<circle class="pulse" cx="'+s.x+'" cy="'+s.y+'" r="20" fill="'+c+'"/>';
     if(done){
-      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="14" fill="'+c+'" stroke="var(--paper)" stroke-width="3"/>';
-      h+='<path d="M'+(s.x-6)+' '+(s.y+.5)+' l4 4 l8 -9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="20" fill="'+c+'" stroke="var(--paper)" stroke-width="3"/>';
+      h+='<path d="M'+(s.x-8)+' '+(s.y+1)+' l5.5 5.5 l11 -12" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>';
     }else if(here){
-      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="14" fill="var(--surface)" stroke="'+c+'" stroke-width="4"/>';
-      h+='<text x="'+s.x+'" y="'+(s.y+5)+'" text-anchor="middle" font-size="13" font-weight="800" style="fill:var(--ink)">'+(i+1)+'</text>';
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="20" fill="var(--surface)" stroke="'+c+'" stroke-width="5"/>';
+      h+='<text x="'+s.x+'" y="'+(s.y+7)+'" text-anchor="middle" font-size="19" font-weight="800" style="fill:var(--ink)">'+(i+1)+'</text>';
     }else{
-      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="13" fill="var(--surface)" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 3" opacity="'+(skip?.5:1)+'"/>';
-      h+='<text x="'+s.x+'" y="'+(s.y+5.5)+'" text-anchor="middle" font-size="16" font-weight="700" style="font-family:var(--display)">'+(skip?'–':'?')+'</text>';
+      h+='<circle cx="'+s.x+'" cy="'+s.y+'" r="19" fill="var(--surface)" stroke="var(--muted)" stroke-width="2.5" stroke-dasharray="4 4" opacity="'+(skip?.5:1)+'"/>';
+      h+='<text x="'+s.x+'" y="'+(s.y+8)+'" text-anchor="middle" font-size="23" font-weight="700" style="font-family:var(--display)">'+(skip?'–':'?')+'</text>';
     }
     h+='</g>';
     if(done||s.id==='retour')labels+='<text class="lab" x="'+(s.x+s.lx)+'" y="'+(s.y+s.ly)+'" text-anchor="'+s.anc+'">'+esc(s.short)+'</text>';
