@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>La chasse d'Ugo</title>
-<meta name="theme-color" content="#FAF3E0">
+<meta name="theme-color" content="#FAF3E0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17131A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="chasse.webmanifest">
 <link rel="apple-touch-icon" href="icons/chasse-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,141 +14,234 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-/* Layout : une colonne de cartes-étapes, la carte en cours ouverte, frise des 16 étapes en tête. Thème clair unique (charte de Lison). */
+/* Layout : app mobile. Barre du haut (étape + score), une étape à la fois en plein écran,
+   bouton d'action contextuel dans la zone du pouce, barre d'onglets en bas. */
 :root{
-  --paper:#FAF3E0; --card:#FFFDF8; --ink:#1A1A1A; --muted:#5A5249; --line:#EADFC6;
-  --blush:#FBC9DC; --rose:#F386AE; --wine:#C9437A; --gold:#E8B84A; --sauge:#CAD8C5;
-  --d1:#F386AE; --d2:#9C87BC; --d3:#7FA3CC; --d4:#88AA80;
+  --bg:#FAF3E0; --surface:#FFFDF8; --surface2:#F3EAD3; --ink:#1F1A17; --muted:#6B6157; --line:#E8DCC2;
+  --accent:#D6457F; --accent-ink:#FFFFFF; --blush:#FBC9DC; --gold:#D99A1E; --shadow:rgba(80,50,20,.18);
+  --d1:#F386AE; --d2:#9C87BC; --d3:#6F98C8; --d4:#7FA477;
   --display:"Fraunces", Georgia, "Times New Roman", serif;
   --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tab:64px; --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
   color-scheme:light;
 }
-*{box-sizing:border-box}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17131A; --surface:#221C24; --surface2:#2C2530; --ink:#F6EEE6; --muted:#B3A79F; --line:#3A3140;
+  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --shadow:rgba(0,0,0,.5);
+  --d1:#F59BBE; --d2:#B6A3D6; --d3:#8DB2DD; --d4:#9CC293; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17131A; --surface:#221C24; --surface2:#2C2530; --ink:#F6EEE6; --muted:#B3A79F; --line:#3A3140;
+  --accent:#F386AE; --accent-ink:#1A1016; --blush:#4A2A3A; --gold:#F0C766; --shadow:rgba(0,0,0,.5);
+  --d1:#F59BBE; --d2:#B6A3D6; --d3:#8DB2DD; --d4:#9CC293; color-scheme:dark}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
-  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 80px}
-h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-top:var(--st);-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
 p{margin:0}
-button,.btn{font:inherit;font-weight:700;font-size:.95rem;border:0;border-radius:999px;padding:11px 18px;cursor:pointer;
-  background:var(--wine);color:#fff;display:inline-flex;align-items:center;gap:8px;text-decoration:none;-webkit-tap-highlight-color:transparent}
-button:active,.btn:active{transform:scale(.97)}
-button.soft,.btn.soft{background:var(--blush);color:var(--ink)}
-button.ghost{background:transparent;color:var(--muted);padding-inline:6px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
-button:focus-visible,.btn:focus-visible,label.btn:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation}
+button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:12px}
+svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Hero */
-.hero{display:grid;gap:10px;padding-bottom:18px}
-.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--wine);font-weight:700}
-.hero h1{font-size:clamp(2.1rem,9vw,3rem);font-weight:700;color:var(--wine)}
-.hero h1 em{font-weight:400;color:var(--rose)}
-.hero .lede{color:var(--ink)}
-.sign{font-family:var(--display);font-style:italic;color:var(--wine)}
+/* Barre du haut */
+.top{position:sticky;top:var(--st);z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:10px 16px 8px;display:grid;gap:8px}
+.top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top .title{font-family:var(--display);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:8px;min-width:0}
+.top .title small{font-family:var(--body);font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.score{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:6px 12px 6px 8px;font-weight:800;font-variant-numeric:tabular-nums;font-size:.95rem}
+.score .star{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;display:grid;place-items:center}
+.score .star svg{width:13px;height:13px;stroke-width:2.6}
+.score.bump{animation:bump .5s ease}
+.seg{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
+.seg i{height:5px;border-radius:3px;background:var(--line)}
+.seg i.done{background:var(--c)}
+.seg i.skip{background:color-mix(in srgb,var(--c) 30%,var(--line))}
+.seg i.here{background:var(--ink)}
 
-/* Score */
-.score{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:4;box-shadow:0 6px 18px -14px rgba(90,60,30,.5)}
-.score .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.pts{font-family:var(--display);font-size:1.7rem;font-weight:700;color:var(--wine);font-variant-numeric:tabular-nums;line-height:1}
-.pts small{font-family:var(--body);font-size:.8rem;color:var(--muted);font-weight:600}
-.rank{font-size:.85rem;font-weight:700;background:var(--blush);border-radius:999px;padding:4px 12px}
-.trail{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;align-items:center}
-.trail i{height:10px;border-radius:5px;background:var(--line);transition:background .3s}
-.trail i.done{background:var(--c)}
-.trail i.skip{background:repeating-linear-gradient(45deg,var(--line) 0 3px,var(--card) 3px 6px)}
-.trail i.cur{outline:2px solid var(--c);outline-offset:1px;background:var(--card)}
-.days{display:flex;justify-content:space-between;font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+main{padding:6px 16px calc(var(--tab) + var(--sb) + 104px);max-width:560px;margin:0 auto}
 
-.tabs{display:flex;gap:8px;margin-block:18px 6px}
-.tabs button{background:var(--card);color:var(--ink);border:1px solid var(--line)}
-.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+/* Étape en plein écran */
+.when{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:20px 18px;display:grid;gap:16px;
+  box-shadow:0 18px 40px -30px var(--shadow);position:relative;overflow:hidden;animation:rise .35s ease-out}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
+.num{font-family:var(--display);font-size:3.2rem;font-weight:700;line-height:.9;color:var(--c);font-variant-numeric:tabular-nums}
+.riddle{font-family:var(--display);font-style:italic;font-weight:400;font-size:1.42rem;line-height:1.38;color:var(--ink)}
+.hint{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border-radius:16px;padding:12px 14px;font-size:.95rem}
+.hint svg{color:var(--gold);margin-top:1px}
+.chipbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:var(--surface2);font-weight:700;font-size:.92rem}
+.chipbtn svg{width:18px;height:18px}
 
-.install{background:var(--sauge);border-radius:14px;padding:12px 14px;font-size:.9rem;margin-top:14px}
-.install b{display:block;margin-bottom:2px}
+.place{display:grid;gap:6px}
+.place .lbl{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.place h2{font-size:1.85rem;color:var(--ink)}
+.place p{color:var(--muted);font-size:.98rem}
+.place.veiled h2{filter:blur(11px);user-select:none}
+.place.veiled p{filter:blur(6px);user-select:none}
+.place.shown h2{animation:unveil .6s ease-out}
+.links{display:flex;flex-wrap:wrap;gap:8px}
 
-/* Steps */
-.steps{display:grid;gap:12px;margin-top:12px;list-style:none;padding:0}
-.step{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;min-width:0}
-.step .head{display:flex;gap:12px;align-items:center;padding:14px 16px;width:100%;background:none;color:var(--ink);border-radius:0;font-weight:600;text-align:left;justify-content:flex-start}
-.badge{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;background:var(--paper);border:2px solid var(--c);color:var(--ink);font-variant-numeric:tabular-nums}
-.step.done .badge{background:var(--c);color:#fff}
-.head .when{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.head .name{font-family:var(--display);font-size:1.12rem;font-weight:600;line-height:1.2}
-.head .txt{display:grid;min-width:0;flex:1}
-.head .thumb{flex:none;width:46px;height:46px;border-radius:10px;object-fit:cover}
-.step.locked{background:transparent;border-style:dashed}
-.step.locked .name{color:var(--muted);font-style:italic;font-weight:400}
-.body{padding:0 16px 18px;display:grid;gap:14px}
-.riddle{font-family:var(--display);font-size:1.22rem;line-height:1.4;font-style:italic;color:var(--ink);border-left:4px solid var(--c);padding-left:14px}
-.hint{font-size:.92rem;background:var(--paper);border-radius:10px;padding:9px 12px}
-.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.reveal{display:grid;gap:8px;animation:pop .45s ease-out}
-.reveal h3{font-size:1.45rem;color:var(--wine)}
-.reveal .about{font-size:.95rem;color:var(--ink)}
-.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.92rem;font-weight:600;background:var(--paper);border-radius:12px;padding:10px 12px}
-.guess button{padding:7px 14px;font-size:.88rem}
-.mission{background:var(--blush);border-radius:14px;padding:14px;display:grid;gap:6px}
-.mission .lbl{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wine)}
-.mission p{font-weight:600}
-.photo{width:100%;max-height:420px;object-fit:cover;border-radius:14px;display:block}
-.maps{font-size:.88rem;font-weight:700;color:var(--wine)}
-input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.busy{font-size:.88rem;color:var(--muted)}
-@keyframes pop{from{opacity:.0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.guess{display:grid;gap:10px;background:var(--surface2);border-radius:18px;padding:14px}
+.guess b{font-size:.98rem}
+.guess .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.guess button{min-height:48px;border-radius:14px;font-weight:800;background:var(--surface);border:1px solid var(--line)}
+.guess button.yes{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.guessed{font-size:.88rem;font-weight:700;color:var(--muted)}
+
+.mission{display:grid;gap:12px;border-radius:20px;padding:16px;background:var(--blush)}
+.mission .lbl{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.mission .lbl svg{width:16px;height:16px}
+.mission p{font-weight:700;font-size:1.08rem;line-height:1.35}
+.shot{display:grid;place-items:center;gap:8px;min-height:170px;border-radius:16px;border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+  background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--accent);font-weight:800;text-align:center;padding:16px;width:100%}
+.shot svg{width:40px;height:40px;stroke-width:1.6}
+.shot small{display:block;font-weight:600;color:var(--muted);font-size:.82rem}
+.pic{position:relative;border-radius:16px;overflow:hidden}
+.pic img{width:100%;max-height:60vh;object-fit:cover;display:block}
+.pic button{position:absolute;right:10px;bottom:10px;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;
+  background:rgba(20,15,12,.6);color:#fff;font-weight:700;font-size:.85rem;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.pic button svg{width:18px;height:18px}
+.saving{font-size:.88rem;color:var(--muted);font-weight:600}
+.err{font-size:.9rem;color:var(--accent);font-weight:700}
+
+.minor{display:flex;justify-content:center;padding-top:4px}
+.minor button{min-height:44px;padding:0 10px;color:var(--muted);font-size:.88rem;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.confirm{display:grid;gap:10px;background:var(--surface2);border-radius:16px;padding:14px;font-size:.95rem}
+.confirm .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.confirm button{min-height:46px;border-radius:12px;font-weight:800;background:var(--surface);border:1px solid var(--line)}
+.confirm button.danger{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.nav{display:flex;justify-content:space-between;margin-top:14px}
+.nav button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:999px;color:var(--muted);font-weight:700;font-size:.88rem}
+.nav button:disabled{opacity:.3}
+
+.locked{display:grid;gap:14px;justify-items:center;text-align:center;padding:30px 10px}
+.locked .lock{width:72px;height:72px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;color:var(--muted)}
+.locked .lock svg{width:32px;height:32px}
+.locked p{color:var(--muted)}
+
+/* Bouton d'action, zone du pouce */
+.cta{position:fixed;left:0;right:0;bottom:calc(var(--tab) + var(--sb));z-index:11;padding:10px 16px 12px;
+  background:linear-gradient(to top,var(--bg) 70%,transparent)}
+.cta .in{max-width:560px;margin:0 auto}
+.primary{width:100%;min-height:58px;border-radius:18px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:1.05rem;
+  display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 12px 26px -14px var(--accent);position:relative;overflow:hidden;
+  transition:transform .12s ease;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+.primary:active{transform:scale(.98)}
+.primary.alt{background:var(--ink);color:var(--bg);box-shadow:none}
+.primary .fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(var(--p,0));background:rgba(255,255,255,.28)}
+.primary span,.primary svg{position:relative}
+.primary .pts{font-size:.85rem;font-weight:800;background:rgba(255,255,255,.22);border-radius:999px;padding:2px 9px}
+
+/* Onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:12;height:calc(var(--tab) + var(--sb));padding-bottom:var(--sb);
+  background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr)}
+.tabs button{display:grid;justify-items:center;align-content:center;gap:3px;font-size:.72rem;font-weight:700;color:var(--muted)}
+.tabs button[aria-current="page"]{color:var(--accent)}
+.tabs .badge{position:absolute;margin-left:22px;margin-top:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:.68rem;display:grid;place-items:center;padding:0 5px}
+.tabs .ic{position:relative;display:grid;place-items:center}
+
+/* Parcours */
+.dayh{display:flex;align-items:center;gap:10px;margin:22px 4px 10px}
+.dayh h2{font-size:1.25rem}
+.dayh small{color:var(--muted);font-weight:700;font-size:.8rem;margin-left:auto;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:8px;list-style:none;padding:0;margin:0}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 12px;min-height:66px}
+.row .b{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:.85rem;border:2px solid var(--c);font-variant-numeric:tabular-nums}
+.row.done .b{background:var(--c);color:#fff;border-color:var(--c)}
+.row.here{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.row .t{display:grid;min-width:0;flex:1}
+.row .t b{font-family:var(--display);font-weight:600;font-size:1.05rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t span{font-size:.78rem;color:var(--muted);font-weight:700}
+.row.lock .t b{color:var(--muted);font-style:italic;font-weight:400}
+.row img{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none}
+.row .go{color:var(--muted)}
+.hero{display:grid;gap:8px;padding:12px 4px 4px}
+.hero h1{font-size:2.2rem;color:var(--accent)}
+.hero h1 em{font-weight:400;color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:2px}
+.stat b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1}
+.stat span{font-size:.75rem;color:var(--muted);font-weight:700}
 
 /* Album */
-.album{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.album figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.album img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:zoom-in}
-.album figcaption{padding:8px 10px;font-size:.78rem;font-weight:600;line-height:1.3}
-.album figcaption span{display:block;color:var(--muted);font-weight:500}
-.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--muted);margin-top:12px}
-.treasure{background:var(--ink);color:var(--paper);border-radius:20px;padding:22px 18px;display:grid;gap:10px;margin-top:12px;text-align:center}
-.treasure h2{color:var(--gold);font-size:2rem}
-.treasure .sign{color:var(--blush)}
-.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.confirm{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;display:grid;gap:8px;font-size:.92rem}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.grid button{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;background:var(--surface2)}
+.grid button:nth-child(3n+1){aspect-ratio:1}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.grid .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;
+  font-size:.78rem;font-weight:700;text-align:left;line-height:1.25}
+.empty{display:grid;gap:10px;justify-items:center;text-align:center;padding:50px 20px;color:var(--muted)}
+.empty svg{width:44px;height:44px;stroke-width:1.5}
+.treasure{border-radius:26px;padding:26px 20px;display:grid;gap:10px;text-align:center;background:var(--ink);color:var(--bg);margin-top:8px}
+.treasure h2{font-size:2.2rem;color:var(--gold)}
+.treasure p{opacity:.9}
+.sign{font-family:var(--display);font-style:italic}
 
-/* Viewer */
-.viewer{position:fixed;inset:0;background:rgba(20,16,12,.94);z-index:20;display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
-.viewer img{max-width:100%;max-height:78vh;border-radius:10px;-webkit-touch-callout:default}
-.viewer p{color:#f5ece0;font-size:.88rem;text-align:center;margin-top:10px}
-.viewer button{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}
+/* Visionneuse */
+.viewer{position:fixed;inset:0;z-index:30;background:#0d0a0c;color:#fff;display:grid;grid-template-rows:auto 1fr auto;
+  padding:calc(var(--st) + 8px) 12px calc(var(--sb) + 12px)}
+.viewer .vt{display:flex;justify-content:space-between;align-items:center}
+.viewer .vt button,.viewer .vb button{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:0 14px;background:rgba(255,255,255,.12);font-weight:700;font-size:.9rem}
+.viewer .stage{display:grid;place-items:center;min-height:0;touch-action:pan-y}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;-webkit-touch-callout:default}
+.viewer .vb{display:grid;gap:10px;text-align:center}
+.viewer .vb b{font-family:var(--display);font-size:1.15rem}
+.viewer .vb span{font-size:.8rem;opacity:.7}
+.viewer .vb .acts{display:flex;justify-content:center;gap:8px}
+
+/* Fête */
+.party{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:grid;place-items:center;padding:24px}
+.party canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+.party .box{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:28px 22px 20px;display:grid;gap:12px;justify-items:center;text-align:center;
+  max-width:360px;width:100%;box-shadow:0 30px 60px -30px var(--shadow);animation:popin .45s cubic-bezier(.2,1.4,.4,1)}
+.party .ok{width:76px;height:76px;border-radius:50%;background:var(--c,var(--accent));color:#fff;display:grid;place-items:center}
+.party .ok svg{width:40px;height:40px;stroke-width:3}
+.party h2{font-size:1.7rem}
+.party .gain{font-family:var(--display);font-size:2.6rem;font-weight:700;color:var(--gold);line-height:1}
+.party .rk{font-weight:800;background:var(--blush);border-radius:999px;padding:6px 14px;font-size:.9rem}
+.party .primary{margin-top:6px}
+
+/* Accueil et installation */
+.welcome{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;align-content:center;gap:22px;padding:calc(var(--st) + 24px) 24px calc(var(--sb) + 24px);overflow:auto}
+.welcome .k{font-size:.75rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.welcome h1{font-size:clamp(2.8rem,14vw,4rem);font-weight:700;color:var(--accent);line-height:.95}
+.welcome h1 em{display:block;font-weight:400;color:var(--ink)}
+.rules{display:grid;gap:12px;list-style:none;padding:0;margin:0}
+.rules li{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;font-weight:600;font-size:.98rem}
+.rules .ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--blush);color:var(--accent)}
+.sheet{position:fixed;left:10px;right:10px;bottom:calc(var(--tab) + var(--sb) + 10px);z-index:35;background:var(--ink);color:var(--bg);border-radius:20px;padding:16px;
+  display:grid;gap:10px;box-shadow:0 20px 40px -20px var(--shadow);animation:rise .35s ease-out;max-width:540px;margin:0 auto}
+.sheet b{font-size:1rem}
+.sheet p{font-size:.92rem;opacity:.9}
+.sheet button{justify-self:end;min-height:44px;padding:0 18px;border-radius:999px;background:var(--bg);color:var(--ink);font-weight:800}
+.toast{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translateX(-50%);z-index:45;background:var(--ink);color:var(--bg);border-radius:999px;padding:10px 18px;font-weight:700;font-size:.9rem;animation:rise .3s ease-out}
+input[type=file]{position:fixed;left:-9999px;width:1px;height:1px;opacity:0}
+
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes unveil{from{filter:blur(11px);opacity:.4}to{filter:none;opacity:1}}
+@keyframes popin{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+@keyframes bump{40%{transform:scale(1.15)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
-    <span class="eyebrow">Boucle du Nord · 15 → 18 octobre</span>
-    <h1>La chasse <em>d'Ugo</em></h1>
-    <p class="lede">16 étapes, 4 jours de scooter. À chaque étape, une énigme : devine où on va, relève le défi, et garde une photo de nous deux. À la fin, l'album est à toi.</p>
-    <p class="sign">Lison</p>
-  </header>
-
-  <div class="score" aria-live="polite">
-    <div class="row"><span class="pts" id="pts">0 <small>/ 320 points</small></span><span class="rank" id="rank"></span></div>
-    <div class="trail" id="trail"></div>
-    <div class="days"><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
-  </div>
-
-  <div class="install" id="install" hidden>
-    <b>À faire une fois, avec du réseau</b>
-    Ajoute la chasse à l'écran d'accueil : bouton Partager, puis « Sur l'écran d'accueil ». Ouvre-la ensuite toujours depuis l'icône : elle marche sans connexion et garde tes photos.
-  </div>
-
-  <div class="tabs" role="group" aria-label="Affichage">
-    <button id="tab-hunt" aria-pressed="true">Les étapes</button>
-    <button id="tab-album" aria-pressed="false">L'album</button>
-  </div>
-
-  <main id="hunt"><ol class="steps" id="steps"></ol></main>
-  <main id="albumView" hidden></main>
-</div>
+<header class="top" id="top"></header>
+<main id="main"></main>
+<div class="cta" id="cta"></div>
+<nav class="tabs" id="tabs" aria-label="Navigation"></nav>
 <input type="file" id="file" accept="image/*">
-<div class="viewer" id="viewer" hidden><button class="soft" id="closeViewer">Fermer</button><div><img id="viewerImg" alt=""><p>Appuie longuement sur la photo pour l'enregistrer dans tes Photos.</p></div></div>
+<div id="layer"></div>
 
 <script>
+/* ---------- Données ---------- */
 var STEPS=[
  {id:'lalitta',day:1,when:'Jeudi 15 · 9h30',
   riddle:"Une forêt de légende, des ponts de pierre et de l'eau qui tombe de partout. Ici, le ticket d'entrée se boit.",
@@ -162,7 +256,7 @@ var STEPS=[
  {id:'xinshidai',day:1,when:'Jeudi 15 · 13h30',
   riddle:"Une boulangerie de plus de 50 ans perchée au milieu des théiers. Tout est fait au vrai beurre, et il faut garder de la place pour un roulé.",
   hint:"Après 30 minutes de montée raide. Le déjeuner du premier jour.",
-  place:'Xin Shi Dai Bakery, Mae Salong',about:"Une boulangerie-café familiale en contrebas de la rue principale. Pizza yunnanaise, tempura, onion rings.",
+  place:'Xin Shi Dai Bakery',about:"Une boulangerie-café familiale de Mae Salong, en contrebas de la rue principale. Pizza yunnanaise, tempura, onion rings.",
   mission:'Le roulé à la vanille, juste avant la première bouchée.',maps:'https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI'},
  {id:'maesalong',day:1,when:'Jeudi 15 · 15h30',
   riddle:"Des soldats chinois sont montés ici après 1949. Leurs enfants ont remplacé le pavot par une feuille qu'on sert dans des tasses minuscules, et la dégustation est gratuite.",
@@ -172,12 +266,12 @@ var STEPS=[
  {id:'sunset1',day:1,when:'Jeudi 15 · 17h15',
   riddle:"Vers 17h50, les rangs verts deviennent dorés. Deux choix : une terrasse fleurie au-dessus des plantations, ou un balcon d'où l'on voit des lucioles.",
   hint:"Le premier coucher de soleil du voyage, en montagne.",
-  place:'Coucher de soleil sur les plantations',about:"Mae Salong Flower Hills, ou le balcon de Twins Farm. Éteins la lumière à la nuit tombée pour voir les lucioles.",
+  place:'Coucher de soleil sur les théiers',about:"Mae Salong Flower Hills, ou le balcon de Twins Farm. Éteins la lumière à la nuit tombée pour voir les lucioles.",
   mission:'Vos deux silhouettes devant le soleil couchant.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag'},
  {id:'marche',day:2,when:'Vendredi 16 · 7h',
   riddle:"Avant 8h, les Akha descendent des montagnes avec des herbes, des champignons et du thé. Le petit-déjeuner se prend debout : un lait chaud et un beignet.",
   hint:"Réveil tôt. Derrière Shin Sane, en montant à gauche après le 7-Eleven.",
-  place:'Le marché du matin de Mae Salong',about:"Le marché des habitants. Demande « jay » pour une version sans viande.",
+  place:'Le marché du matin',about:"Le marché des habitants de Mae Salong. Demande « jay » pour une version sans viande.",
   mission:'Le lait de soja et les beignets, tenus par vos deux mains.',maps:'https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok'},
  {id:'triangle',day:2,when:'Vendredi 16 · 15h35',
   riddle:"Trois pays se regardent par-dessus l'eau, là où une rivière rejoint un très grand fleuve. Un grand bouddha doré les surveille.",
@@ -187,7 +281,7 @@ var STEPS=[
  {id:'chiangsaen',day:2,when:'Vendredi 16 · 16h10',
   riddle:"Une ancienne capitale du royaume du Lanna. Les temples en brique sont mangés par les arbres, et le plus beau se cache dans une forêt de tecks. Il ferme à 17h.",
   hint:"La vieille ville, 15 minutes au sud du Triangle d'Or.",
-  place:'Wat Pa Sak et la vieille ville de Chiang Saen',about:"Wat Pa Sak, le chedi de 58 m de Wat Phra That Chedi Luang, et Chom Kitti sur sa colline.",
+  place:'Wat Pa Sak, Chiang Saen',about:"Wat Pa Sak, le chedi de 58 m de Wat Phra That Chedi Luang, et Chom Kitti sur sa colline.",
   mission:"Une photo où un arbre a l'air plus vieux que le temple.",maps:'https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen'},
  {id:'mekong',day:2,when:'Vendredi 16 · 17h25',
   riddle:"Le soleil se couche dans votre dos, et pourtant c'est au-dessus d'un autre pays que le ciel devient rose.",
@@ -202,7 +296,7 @@ var STEPS=[
  {id:'thampla',day:3,when:'Samedi 17 · 13h',
   riddle:"Un temple rouge et or collé à la falaise, des poissons énormes dans une source claire, et des habitants poilus qui n'ont peur de personne.",
   hint:"Sur la route de la frontière. Prends un bâton de bambou à l'entrée.",
-  place:'Wat Tham Pla, la grotte aux singes',about:"Un lieu de culte local, avec une grotte-sanctuaire en haut des escaliers. Rien dans les mains, sac fermé.",
+  place:'Wat Tham Pla',about:"La grotte aux singes : un lieu de culte local, avec une grotte-sanctuaire en haut des escaliers. Rien dans les mains, sac fermé.",
   mission:'Un singe et vous deux dans la même photo, à bonne distance.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE'},
  {id:'chouifong',day:3,when:'Samedi 17 · 14h20',
   riddle:"160 hectares de vagues vertes, plantées en 1977. On marche dans les rangs, puis on s'assoit derrière une grande vitre.",
@@ -217,7 +311,7 @@ var STEPS=[
  {id:'doitung',day:4,when:'Dimanche 18 · 10h',
   riddle:"Une princesse a remplacé le pavot par du café, de la macadamia et des fleurs. Sa maison ressemble à un chalet suisse.",
   hint:"Le Hall of Opium raconte le début de l'histoire, ici on en voit la fin.",
-  place:'Doi Tung, la villa et les jardins royaux',about:"La villa de la princesse mère et les jardins de Mae Fah Luang, fleuris toute l'année. Café Doi Tung à goûter.",
+  place:'Doi Tung',about:"La villa de la princesse mère et les jardins de Mae Fah Luang, fleuris toute l'année. Café Doi Tung à goûter.",
   mission:'Vous deux dans les jardins, avec le plus de fleurs possible.',maps:'https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ'},
  {id:'bigbuddha',day:4,when:'Dimanche 18 · 14h50',
   riddle:"69 mètres, toute blanche, et on monte dans sa tête en ascenseur. Tout le monde l'appelle Big Buddha, mais c'est une déesse.",
@@ -230,20 +324,42 @@ var STEPS=[
   place:'Retour à Chiang Rai',about:"On rend le scooter. Kunda est ouvert le dimanche jusqu'à 19h30, espèces uniquement.",
   mission:'La photo de fin : vous deux et le scooter, ou vos burgers chez Kunda.',maps:'https://www.google.com/maps/search/?api=1&query=Kunda+Vegetarian+Vegan+Burger+Cafe&query_place_id=ChIJ6c5ecyIH1zAR0Ah-y-LCrZQ'}
 ];
+var DAYS={1:'Jeudi 15',2:'Vendredi 16',3:'Samedi 17',4:'Dimanche 18'};
+var DAYNAME={1:'Vers Mae Salong',2:'Vers le Mékong',3:'La grotte et le thé',4:'Doi Tung et retour'};
 var DAYCOLOR={1:'var(--d1)',2:'var(--d2)',3:'var(--d3)',4:'var(--d4)'};
 var RANKS=[[0,'Passager du scooter'],[60,"Goûteur d'oolong"],[120,'Explorateur du Mékong'],[200,"Gardien du Triangle d'Or"],[280,'Légende de la Boucle du Nord']];
+var MAX=STEPS.length*20;
+var IC={
+ star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+ cam:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.6"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0012 3z"/>',
+ pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>', left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+ route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/>',
+ photos:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
+ share:'<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>', swap:'<path d="M4 7h13l-3-3M20 17H7l3 3"/>',
+ gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v9h14v-9M12 8C10 4 6 4 6 6.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/>'
+};
+function ic(n,cls){return '<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ---------- État ---------- */
 var KEY='chasse-ugo-v1';
-
-/* --- état --- */
-var S={revealed:{},hint:{},guessed:{},done:{},skipped:{},photo:{},opened:{}};
-try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function fresh(){return {revealed:{},hint:{},guessed:{},done:{},skipped:{},photo:{},opened:{},started:false,installSeen:false};}
+var S=fresh();
+try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(fresh(),JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+var V={tab:'hunt',focus:null,confirmSkip:false,confirmReset:false,saving:null,error:null};
 
-/* --- photos : IndexedDB --- */
+/* ---------- Photos (IndexedDB, restent sur le téléphone) ---------- */
 var dbp=null;
 function idb(){if(dbp)return dbp;dbp=new Promise(function(res,rej){
-  if(!window.indexedDB)return rej('no idb');
-  var r=indexedDB.open('chasse-ugo',1);
+  if(!window.indexedDB)return rej('no idb');var r=indexedDB.open('chasse-ugo',1);
   r.onupgradeneeded=function(){r.result.createObjectStore('photos');};
   r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});return dbp;}
 function putPhoto(id,blob){return idb().then(function(db){return new Promise(function(res,rej){
@@ -255,158 +371,312 @@ function clearPhotos(){return idb().then(function(db){return new Promise(functio
 var urls={};
 function photoUrl(id){if(urls[id])return Promise.resolve(urls[id]);
   return getPhoto(id).then(function(b){if(!b)return null;urls[id]=URL.createObjectURL(b);return urls[id];});}
-
+/* remplit les <img data-photo="id"> après chaque rendu */
+function hydrate(root){root.querySelectorAll('img[data-photo]').forEach(function(im){
+  photoUrl(im.getAttribute('data-photo')).then(function(u){if(u)im.src=u;});});}
 function loadImage(file){
-  if(window.createImageBitmap){return createImageBitmap(file,{imageOrientation:'from-image'}).catch(function(){return viaImg(file);});}
-  return viaImg(file);
-}
-function viaImg(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file);var im=new Image();
-  im.onload=function(){res(im);};im.onerror=rej;im.src=u;});}
+  if(window.createImageBitmap)return createImageBitmap(file,{imageOrientation:'from-image'}).catch(function(){return viaImg(file);});
+  return viaImg(file);}
+function viaImg(file){return new Promise(function(res,rej){var im=new Image();im.onload=function(){res(im);};im.onerror=rej;im.src=URL.createObjectURL(file);});}
 function compress(file){return loadImage(file).then(function(img){
-  var w=img.width,h=img.height,m=1600,s=Math.min(1,m/Math.max(w,h));
+  var w=img.width,h=img.height,s=Math.min(1,1600/Math.max(w,h));
   var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);
   c.getContext('2d').drawImage(img,0,0,c.width,c.height);
   return new Promise(function(res){c.toBlob(function(b){res(b||file);},'image/jpeg',0.85);});
 }).catch(function(){return file;});}
 
-/* --- calculs --- */
+/* ---------- Calculs ---------- */
 function settled(id){return !!(S.done[id]||S.skipped[id]);}
-function currentIndex(){for(var i=0;i<STEPS.length;i++){if(!settled(STEPS[i].id))return i;}return -1;}
-function points(){var p=0;STEPS.forEach(function(s){if(S.done[s.id])p+=10;if(S.done[s.id]&&S.photo[s.id])p+=5;if(S.guessed[s.id]===true)p+=5;});return p;}
+function currentIndex(){for(var i=0;i<STEPS.length;i++)if(!settled(STEPS[i].id))return i;return -1;}
+function stepPoints(id){return (S.done[id]?10:0)+(S.done[id]&&S.photo[id]?5:0)+(S.guessed[id]===true?5:0);}
+function points(){return STEPS.reduce(function(p,s){return p+stepPoints(s.id);},0);}
 function rank(p){var r=RANKS[0][1];RANKS.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
+function unlocked(i){var s=STEPS[i];return settled(s.id)||i===currentIndex()||!!S.opened[s.id];}
+function focusIndex(){var c=currentIndex();if(V.focus===null)return c<0?-1:c;return V.focus;}
+function photoCount(){return STEPS.filter(function(s){return S.photo[s.id];}).length;}
+function doneCount(){return STEPS.filter(function(s){return S.done[s.id];}).length;}
 
-/* --- rendu --- */
+/* ---------- Rendu ---------- */
 var $=function(id){return document.getElementById(id);};
-var openId=null;
-function el(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==='text')e.textContent=attrs[k];else if(k==='class')e.className=attrs[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}
-  (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?document.createTextNode(c):c);});return e;}
+function render(){renderTop();renderMain();renderCta();renderTabs();}
 
-function renderScore(){
-  var p=points();$('pts').firstChild.nodeValue=p+' ';$('rank').textContent=rank(p);
-  var cur=currentIndex(),t=$('trail');t.innerHTML='';
-  STEPS.forEach(function(s,i){var cls=S.done[s.id]?'done':S.skipped[s.id]?'skip':i===cur?'cur':'';
-    var d=el('i',{class:cls,title:s.when});d.style.setProperty('--c',DAYCOLOR[s.day]);t.appendChild(d);});
+function renderTop(){
+  var fi=focusIndex(),cur=currentIndex(),title;
+  if(V.tab==='hunt')title=fi<0?'Trésor trouvé':'Étape '+(fi+1)+' <small>/ '+STEPS.length+'</small>';
+  else if(V.tab==='route')title='Le parcours';else title="L'album";
+  var seg=STEPS.map(function(s,i){var c=S.done[s.id]?'done':S.skipped[s.id]?'skip':(V.tab==='hunt'&&i===fi)?'here':'';
+    return '<i class="'+c+'" style="--c:'+DAYCOLOR[s.day]+'"></i>';}).join('');
+  $('top').innerHTML='<div class="row"><span class="title">'+title+'</span><span class="score" id="score" aria-label="'+points()+' points"><span class="star">'+ic('star')+'</span>'+points()+'</span></div><div class="seg" aria-hidden="true">'+seg+'</div>';
 }
 
-function renderSteps(){
-  var ol=$('steps');ol.innerHTML='';var cur=currentIndex();
-  if(openId===null&&cur>=0)openId=STEPS[cur].id;
-  STEPS.forEach(function(s,i){
-    var isDone=!!S.done[s.id],isSkip=!!S.skipped[s.id],unlocked=isDone||isSkip||i===cur||S.opened[s.id];
-    var li=el('li',{class:'step'+(isDone?' done':'')+(unlocked?'':' locked'),id:'step-'+s.id});
-    li.style.setProperty('--c',DAYCOLOR[s.day]);
-    var name=(unlocked&&(S.revealed[s.id]))?s.place:(unlocked?'Énigme à résoudre':'Étape mystère');
-    var txt=el('span',{class:'txt'},[el('span',{class:'when',text:s.when+(isSkip?' · passée':'')}),el('span',{class:'name',text:name})]);
-    var head=el('button',{class:'head','aria-expanded':String(openId===s.id),onclick:function(){openId=(openId===s.id)?'__none':s.id;renderSteps();}},[el('span',{class:'badge',text:isDone?'✓':String(i+1)}),txt]);
-    if(isDone&&S.photo[s.id]){var th=el('img',{class:'thumb',alt:''});photoUrl(s.id).then(function(u){if(u)th.src=u;else th.remove();});head.appendChild(th);}
-    li.appendChild(head);
-    if(openId===s.id)li.appendChild(unlocked?stepBody(s,i):lockedBody(s));
-    ol.appendChild(li);
+function renderTabs(){
+  var t=[['hunt','compass','Chasse'],['route','route','Parcours'],['album','photos','Album']];
+  var n=photoCount();
+  $('tabs').innerHTML=t.map(function(x){return '<button data-act="tab" data-tab="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'><span class="ic">'+ic(x[1])+
+    (x[0]==='album'&&n?'<span class="badge">'+n+'</span>':'')+'</span>'+x[2]+'</button>';}).join('');
+}
+
+function renderMain(){
+  var m=$('main');
+  if(V.tab==='route')m.innerHTML=routeView();
+  else if(V.tab==='album')m.innerHTML=albumView();
+  else m.innerHTML=huntView();
+  hydrate(m);
+}
+
+function huntView(){
+  var i=focusIndex();
+  if(i<0)return finaleView();
+  var s=STEPS[i],c=DAYCOLOR[s.day],h='';
+  var nav='<div class="nav"><button data-act="prev"'+(i===0?' disabled':'')+'>'+ic('left')+'Précédente</button><button data-act="next"'+(i===STEPS.length-1?' disabled':'')+'>Suivante'+ic('right')+'</button></div>';
+  if(!unlocked(i)){
+    return '<section class="card" style="--c:'+c+'"><span class="when"><span class="dot"></span>'+esc(s.when)+'</span>'+
+      '<div class="locked"><span class="lock">'+ic('lock')+'</span><h2>Étape mystère</h2><p>Elle s\'ouvre quand la précédente est validée. Si le programme change sur place, tu peux l\'ouvrir maintenant.</p>'+
+      '<button class="chipbtn" data-act="unlock">'+ic('eye')+'L\'ouvrir maintenant</button></div></section>'+nav;
+  }
+  var rev=!!S.revealed[s.id];
+  h+='<section class="card" style="--c:'+c+'">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span class="when"><span class="dot"></span>'+esc(s.when)+'</span><span class="num">'+String(i+1).padStart(2,'0')+'</span></div>';
+  h+='<p class="riddle">'+esc(s.riddle)+'</p>';
+  if(!rev){
+    h+=S.hint[s.id]?'<p class="hint">'+ic('bulb')+'<span>'+esc(s.hint)+'</span></p>':'<div><button class="chipbtn" data-act="hint">'+ic('bulb')+'Un indice</button></div>';
+    h+='<div class="place veiled" aria-hidden="true"><span class="lbl">Le lieu</span><h2>'+esc(s.place)+'</h2><p>'+esc(s.about)+'</p></div>';
+  }else{
+    h+='<div class="place shown"><span class="lbl">Le lieu</span><h2>'+esc(s.place)+'</h2><p>'+esc(s.about)+'</p></div>';
+    h+='<div class="links"><a class="chipbtn" href="'+esc(s.maps)+'" target="_blank" rel="noopener">'+ic('pin')+'Ouvrir dans Maps</a></div>';
+    if(S.guessed[s.id]===undefined){
+      h+='<div class="guess"><b>Tu avais trouvé avant de révéler ?</b><div class="two"><button class="yes" data-act="guess" data-v="1">Oui · +5</button><button data-act="guess" data-v="0">Non</button></div></div>';
+    }else{
+      h+='<p class="guessed">'+(S.guessed[s.id]?'Trouvé tout seul · +5':'Pas trouvé cette fois')+'</p>';
+    }
+    h+='<div class="mission"><span class="lbl">'+ic('cam')+'Défi photo · +5</span><p>'+esc(s.mission)+'</p>';
+    if(S.photo[s.id]){
+      h+='<div class="pic"><img data-photo="'+s.id+'" alt="Votre photo : '+esc(s.place)+'" data-act="view" data-id="'+s.id+'"><button data-act="photo">'+ic('swap')+'Changer</button></div>';
+    }else{
+      h+='<button class="shot" data-act="photo">'+ic('cam')+'<span>Prendre ou choisir la photo<small>Appareil photo ou galerie</small></span></button>';
+    }
+    if(V.saving===s.id)h+='<p class="saving">Enregistrement de la photo…</p>';
+    if(V.error)h+='<p class="err">'+esc(V.error)+'</p>';
+    h+='</div>';
+  }
+  if(!settled(s.id)){
+    if(V.confirmSkip){
+      h+='<div class="confirm"><b>Passer cette étape ?</b><span>Elle ne rapporte pas de points. Tu pourras y revenir depuis le parcours.</span><div class="two"><button class="danger" data-act="skip">Passer</button><button data-act="noskip">Annuler</button></div></div>';
+    }else h+='<div class="minor"><button data-act="askskip">Le programme a changé ? Passer cette étape</button></div>';
+  }else if(S.skipped[s.id]){
+    h+='<p class="guessed">Étape passée. Tu peux encore la valider.</p>';
+  }
+  h+='</section>'+nav;
+  return h;
+}
+
+function finaleView(){
+  return '<section class="treasure"><span class="when" style="color:inherit;opacity:.7;justify-content:center">Boucle bouclée</span><h2>Trésor trouvé</h2>'+
+    '<p>'+points()+' points sur '+MAX+' · '+esc(rank(points()))+'</p><p>Le trésor, c\'est l\'album : 4 jours, 400 km, et nous deux sur chaque photo.</p><p class="sign">Lison</p></section>'+
+    '<div class="stats" style="margin-top:12px">'+stats()+'</div>';
+}
+function stats(){var g=STEPS.filter(function(s){return S.guessed[s.id]===true;}).length;
+  return '<div class="stat"><b>'+doneCount()+'</b><span>étapes</span></div><div class="stat"><b>'+photoCount()+'</b><span>photos</span></div><div class="stat"><b>'+g+'</b><span>trouvées seul</span></div>';}
+
+function routeView(){
+  var cur=currentIndex(),h='<div class="hero"><h1>La chasse <em>d\'Ugo</em></h1><div class="stats">'+stats()+'</div></div>';
+  [1,2,3,4].forEach(function(d){
+    var idx=[];STEPS.forEach(function(s,i){if(s.day===d)idx.push(i);});
+    var dn=idx.filter(function(i){return settled(STEPS[i].id);}).length;
+    h+='<div class="dayh" style="--c:'+DAYCOLOR[d]+'"><span class="dot"></span><h2>'+DAYS[d]+'</h2><small>'+dn+' / '+idx.length+'</small></div>';
+    h+='<p style="margin:-6px 4px 10px;color:var(--muted);font-size:.88rem;font-weight:600">'+DAYNAME[d]+'</p><ol class="list">';
+    idx.forEach(function(i){var s=STEPS[i],u=unlocked(i),done=!!S.done[s.id];
+      var name=(u&&S.revealed[s.id])?s.place:(u?'Énigme à résoudre':'Étape mystère');
+      var cls='row'+(done?' done':'')+(i===cur?' here':'')+(u?'':' lock');
+      h+='<li><button class="'+cls+'" style="--c:'+DAYCOLOR[s.day]+'" data-act="goto" data-i="'+i+'"><span class="b">'+(done?ic('check'):(u?i+1:ic('lock')))+'</span>'+
+        '<span class="t"><b>'+esc(name)+'</b><span>'+esc(s.when.split(' · ')[1])+(S.skipped[s.id]?' · passée':'')+(i===cur?' · en cours':'')+'</span></span>'+
+        (S.photo[s.id]?'<img data-photo="'+s.id+'" alt="">':'<span class="go">'+ic('right')+'</span>')+'</button></li>';});
+    h+='</ol>';
   });
-  renderScore();
+  h+='<div class="minor" style="margin-top:24px">'+(V.confirmReset?'':'<button data-act="askreset">Recommencer la chasse</button>')+'</div>';
+  if(V.confirmReset)h+='<div class="confirm"><b>Tout effacer ?</b><span>Points et photos de l\'appli seront supprimés. Les photos déjà enregistrées dans ton téléphone ne sont pas touchées.</span><div class="two"><button class="danger" data-act="reset">Tout effacer</button><button data-act="noreset">Annuler</button></div></div>';
+  return h;
 }
 
-function lockedBody(s){
-  return el('div',{class:'body'},[
-    el('p',{class:'hint',text:"Cette étape s'ouvre quand la précédente est validée. Si le programme change sur place, tu peux l'ouvrir maintenant."}),
-    el('div',{class:'actions'},[el('button',{class:'soft',text:"L'ouvrir maintenant",onclick:function(){S.opened[s.id]=true;save();renderSteps();}})])]);
+function albumView(){
+  var ps=STEPS.filter(function(s){return S.photo[s.id];});
+  if(!ps.length)return '<div class="empty">'+ic('photos')+'<b>Pas encore de photo</b><span>Chaque défi photo relevé arrive ici.</span></div>';
+  var h='<div class="hero"><h1>Nos <em>photos</em></h1><p style="color:var(--muted);font-weight:600">'+ps.length+' photo'+(ps.length>1?'s':'')+' · touche une photo pour l\'agrandir</p></div><div class="grid">';
+  ps.forEach(function(s){h+='<button data-act="view" data-id="'+s.id+'"><img data-photo="'+s.id+'" alt="'+esc(s.place)+'" loading="lazy"><span class="cap">'+esc(s.place)+'</span></button>';});
+  return h+'</div>';
 }
 
-function stepBody(s,i){
-  var b=el('div',{class:'body'});
-  b.appendChild(el('p',{class:'riddle',text:s.riddle}));
-  if(!S.revealed[s.id]){
-    if(S.hint[s.id])b.appendChild(el('p',{class:'hint',text:'Indice : '+s.hint}));
-    b.appendChild(el('div',{class:'actions'},[
-      el('button',{text:'Révéler le lieu',onclick:function(){S.revealed[s.id]=true;save();renderSteps();}}),
-      S.hint[s.id]?null:el('button',{class:'soft',text:'Un indice',onclick:function(){S.hint[s.id]=true;save();renderSteps();}})]));
-    return b;
+function renderCta(){
+  var c=$('cta'),h='';
+  if(V.tab==='album'){
+    h=photoCount()?'<button class="primary alt" data-act="shareall">'+ic('share')+'<span>Partager toutes les photos</span></button>':'';
+  }else if(V.tab==='route'){
+    var cur=currentIndex();
+    h=cur<0?'':'<button class="primary" data-act="resume">'+ic('compass')+'<span>Reprendre l\'étape '+(cur+1)+'</span></button>';
+  }else{
+    var i=focusIndex();
+    if(i<0){h='<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Voir l\'album</span></button>';}
+    else{var s=STEPS[i];
+      if(!unlocked(i))h='<button class="primary alt" data-act="resume">'+ic('compass')+'<span>Revenir à l\'étape en cours</span></button>';
+      else if(!S.revealed[s.id])h='<button class="primary" id="hold" data-act="hold" aria-label="Maintenir pour révéler le lieu"><span class="fill"></span>'+ic('eye')+'<span>Maintenir pour révéler</span></button>';
+      else if(!S.done[s.id])h=S.photo[s.id]
+        ?'<button class="primary" data-act="validate">'+ic('check')+'<span>Valider l\'étape</span><span class="pts">+'+(10+5+(S.guessed[s.id]===true?5:0))+'</span></button>'
+        :'<button class="primary" data-act="photo">'+ic('cam')+'<span>Prendre la photo</span></button>';
+      else{var cur2=currentIndex();
+        h=cur2<0?'<button class="primary" data-act="resume">'+ic('gift')+'<span>Voir le trésor</span></button>'
+          :(cur2===i?'':'<button class="primary alt" data-act="resume">'+ic('arrow')+'<span>'+(cur2>i?'Aller à l\'étape '+(cur2+1):'Revenir à l\'étape '+(cur2+1))+'</span></button>');}
+    }
   }
-  var rv=el('div',{class:'reveal'},[el('h3',{text:s.place}),el('p',{class:'about',text:s.about}),
-    el('a',{class:'maps',href:s.maps,target:'_blank',rel:'noopener',text:'Ouvrir dans Maps ↗'})]);
-  b.appendChild(rv);
-  if(S.guessed[s.id]===undefined){
-    b.appendChild(el('div',{class:'guess'},['Tu avais trouvé ?',
-      el('button',{text:'Oui (+5)',onclick:function(){S.guessed[s.id]=true;save();renderSteps();}}),
-      el('button',{class:'soft',text:'Non',onclick:function(){S.guessed[s.id]=false;save();renderSteps();}})]));
-  }
-  var m=el('div',{class:'mission'},[el('span',{class:'lbl',text:'Défi photo · +5'}),el('p',{text:s.mission})]);
-  b.appendChild(m);
-  var holder=el('div');b.appendChild(holder);
-  if(S.photo[s.id]){photoUrl(s.id).then(function(u){if(u){var im=el('img',{class:'photo',alt:'Photo : '+s.place,src:u});im.addEventListener('click',function(){view(u);});holder.appendChild(im);}});}
-  var acts=el('div',{class:'actions'});
-  acts.appendChild(el('button',{class:S.photo[s.id]?'soft':'',text:S.photo[s.id]?'Changer la photo':'Prendre ou choisir la photo',onclick:function(){pick(s.id);}}));
-  if(!S.done[s.id]){
-    acts.appendChild(el('button',{class:S.photo[s.id]?'':'soft',text:'Valider l’étape (+10)',onclick:function(){S.done[s.id]=Date.now();delete S.skipped[s.id];save();openId=null;renderSteps();scrollToCurrent();}}));
-    if(!S.skipped[s.id])acts.appendChild(el('button',{class:'ghost',text:'On a sauté cette étape',onclick:function(){S.skipped[s.id]=true;save();openId=null;renderSteps();scrollToCurrent();}}));
-  }
-  b.appendChild(acts);
-  b.appendChild(el('p',{class:'busy',id:'busy-'+s.id}));
-  return b;
+  c.innerHTML=h?'<div class="in">'+h+'</div>':'';c.hidden=!h;
+  // petite validation sans photo, sous le bouton principal
+  if(V.tab==='hunt'){var i2=focusIndex();if(i2>=0){var s2=STEPS[i2];
+    if(unlocked(i2)&&S.revealed[s2.id]&&!S.done[s2.id]&&!S.photo[s2.id]){
+      c.querySelector('.in').insertAdjacentHTML('beforeend','<div class="minor" style="padding-top:2px"><button data-act="validate" style="min-height:36px">Valider sans photo (+10)</button></div>');}}}
+  bindHold();
 }
 
-function scrollToCurrent(){var c=currentIndex();if(c<0){showAlbum();return;}
-  var e=$('step-'+STEPS[c].id);if(e)e.scrollIntoView({behavior:'smooth',block:'center'});}
+/* ---------- Appui long pour révéler ---------- */
+function bindHold(){
+  var b=$('hold');if(!b)return;var t0=0,raf=0,dur=900;
+  function stop(){cancelAnimationFrame(raf);raf=0;b.style.setProperty('--p',0);}
+  function tick(){var p=Math.min(1,(performance.now()-t0)/dur);b.style.setProperty('--p',p);
+    if(p>=1){raf=0;buzz(30);reveal();return;}raf=requestAnimationFrame(tick);}
+  b.addEventListener('pointerdown',function(e){e.preventDefault();t0=performance.now();buzz(8);raf=requestAnimationFrame(tick);});
+  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,function(){if(raf)stop();});});
+  b.addEventListener('contextmenu',function(e){e.preventDefault();});
+  b.addEventListener('click',function(e){if(e.detail===0)reveal();}); // clavier, lecteur d'écran
+}
+function reveal(){var s=STEPS[focusIndex()];S.revealed[s.id]=true;save();render();}
+function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
 
-var pickFor=null;
-function pick(id){pickFor=id;$('file').value='';$('file').click();}
-$('file').addEventListener('change',function(){
-  var f=this.files&&this.files[0],id=pickFor;if(!f||!id)return;
-  var busy=$('busy-'+id);if(busy)busy.textContent='Enregistrement de la photo…';
-  compress(f).then(function(blob){return putPhoto(id,blob);}).then(function(){
-    if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id];}
-    S.photo[id]=true;save();renderSteps();
-  }).catch(function(){if(busy)busy.textContent="La photo n'a pas pu être enregistrée : la mémoire du téléphone est peut-être pleine. Réessaie avec une autre photo.";});
+/* ---------- Actions ---------- */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;var a=b.getAttribute('data-act');
+  var i=focusIndex(),s=i>=0?STEPS[i]:null;
+  switch(a){
+    case 'tab':V.tab=b.getAttribute('data-tab');V.confirmReset=false;render();scrollTo(0,0);break;
+    case 'hint':S.hint[s.id]=true;save();render();break;
+    case 'guess':S.guessed[s.id]=b.getAttribute('data-v')==='1';save();render();if(S.guessed[s.id])bump();break;
+    case 'photo':pickFor=s.id;$('file').value='';$('file').click();break;
+    case 'validate':validate(i);break;
+    case 'askskip':V.confirmSkip=true;render();break;
+    case 'noskip':V.confirmSkip=false;render();break;
+    case 'skip':S.skipped[s.id]=true;save();V.confirmSkip=false;V.focus=null;render();scrollTo(0,0);toast('Étape passée');break;
+    case 'unlock':S.opened[s.id]=true;save();render();break;
+    case 'prev':V.focus=Math.max(0,i-1);V.confirmSkip=false;render();scrollTo(0,0);break;
+    case 'next':V.focus=Math.min(STEPS.length-1,i+1);V.confirmSkip=false;render();scrollTo(0,0);break;
+    case 'resume':V.tab='hunt';V.focus=null;render();scrollTo(0,0);break;
+    case 'goto':V.tab='hunt';V.focus=+b.getAttribute('data-i');V.confirmSkip=false;render();scrollTo(0,0);break;
+    case 'view':openViewer(b.getAttribute('data-id'));break;
+    case 'shareall':shareAll();break;
+    case 'askreset':V.confirmReset=true;render();break;
+    case 'noreset':V.confirmReset=false;render();break;
+    case 'reset':var keep={started:true,installSeen:S.installSeen};S=Object.assign(fresh(),keep);save();clearPhotos().then(function(){urls={};V={tab:'hunt',focus:null};render();toast('Chasse remise à zéro');});break;
+  }
 });
 
-/* --- album --- */
-function showAlbum(){$('tab-album').click();}
-function renderAlbum(){
-  var v=$('albumView');v.innerHTML='';
-  var all=currentIndex()<0;
-  if(all){v.appendChild(el('div',{class:'treasure'},[el('span',{class:'eyebrow',text:'Boucle bouclée'}),el('h2',{text:'Trésor trouvé'}),
-    el('p',{text:points()+' points · '+rank(points())+'. Le trésor, c’est cet album : 4 jours, 400 km, et nous deux sur chaque photo.'}),el('p',{class:'sign',text:'Lison'})]));}
-  var withPhoto=STEPS.filter(function(s){return S.photo[s.id];});
-  if(!withPhoto.length){v.appendChild(el('p',{class:'empty',text:"Pas encore de photo. Elles arrivent ici au fil des défis."}));}
-  else{
-    var g=el('div',{class:'album'});
-    withPhoto.forEach(function(s){var im=el('img',{alt:s.place,loading:'lazy'});
-      photoUrl(s.id).then(function(u){if(u){im.src=u;im.addEventListener('click',function(){view(u);});}});
-      g.appendChild(el('figure',null,[im,el('figcaption',null,[s.place,el('span',{text:s.when})])]));});
-    v.appendChild(g);
-    var tools=el('div',{class:'tools'});
-    tools.appendChild(el('button',{text:'Partager toutes les photos',onclick:shareAll}));
-    v.appendChild(tools);
-    v.appendChild(el('p',{class:'busy',id:'shareMsg',text:"Pour en garder une seule : touche-la, puis appuie longuement dessus."}));
-  }
-  var reset=el('div',{class:'tools'},[el('button',{class:'ghost',text:'Recommencer la chasse',onclick:function(){
-    if($('confirmReset'))return;
-    reset.after(el('div',{class:'confirm',id:'confirmReset'},['Tout effacer, points et photos ? Les photos déjà enregistrées dans ton téléphone ne sont pas touchées.',
-      el('div',{class:'actions'},[el('button',{text:'Tout effacer',onclick:function(){S={revealed:{},hint:{},guessed:{},done:{},skipped:{},photo:{},opened:{}};save();clearPhotos().then(function(){openId=null;$('tab-hunt').click();});}}),
-      el('button',{class:'soft',text:'Annuler',onclick:function(){$('confirmReset').remove();}})])]));}})]);
-  v.appendChild(reset);
+var pickFor=null;
+$('file').addEventListener('change',function(){
+  var f=this.files&&this.files[0],id=pickFor;if(!f||!id)return;
+  V.saving=id;V.error=null;render();
+  compress(f).then(function(blob){return putPhoto(id,blob);}).then(function(){
+    if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id];}
+    S.photo[id]=true;save();V.saving=null;buzz(15);render();
+  }).catch(function(){V.saving=null;V.error="La photo n'a pas pu être enregistrée. La mémoire du téléphone est peut-être pleine : réessaie avec une autre photo.";render();});
+});
+
+function validate(i){
+  var s=STEPS[i],before=rank(points());
+  S.done[s.id]=Date.now();delete S.skipped[s.id];save();
+  var gain=stepPoints(s.id),after=rank(points());
+  V.focus=null;V.confirmSkip=false;render();scrollTo(0,0);bump();buzz([20,40,20]);
+  celebrate(s,gain,before!==after?after:null);
 }
-function shareAll(){
-  var msg=$('shareMsg');
-  Promise.all(STEPS.filter(function(s){return S.photo[s.id];}).map(function(s,i){return getPhoto(s.id).then(function(b){
-    return b?new File([b],String(i+1).padStart(2,'0')+'-'+s.id+'.jpg',{type:'image/jpeg'}):null;});}))
+function bump(){var e=$('score');if(e){e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump');}}
+function toast(t){var d=document.createElement('div');d.className='toast';d.textContent=t;$('layer').appendChild(d);setTimeout(function(){d.remove();},1800);}
+
+/* ---------- Fête ---------- */
+function celebrate(s,gain,newRank){
+  var last=currentIndex()<0;
+  var box=document.createElement('div');box.className='party';box.style.setProperty('--c',DAYCOLOR[s.day]);
+  box.innerHTML='<canvas></canvas><div class="box" role="dialog" aria-modal="true" aria-label="Étape validée"><span class="ok">'+ic('check')+'</span>'+
+    '<h2>'+esc(s.place)+'</h2><span class="gain">+'+gain+'</span>'+(newRank?'<span class="rk">Nouveau grade : '+esc(newRank)+'</span>':'<span class="rk">'+esc(rank(points()))+'</span>')+
+    '<button class="primary" data-close>'+(last?ic('gift')+'<span>Découvrir le trésor</span>':ic('arrow')+'<span>Énigme suivante</span>')+'</button></div>';
+  $('layer').appendChild(box);
+  box.querySelector('[data-close]').addEventListener('click',function(){box.remove();});
+  box.querySelector('[data-close]').focus();
+  confetti(box.querySelector('canvas'));
+}
+function confetti(cv){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var dpr=Math.min(2,devicePixelRatio||1),W=innerWidth,H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;
+  var x=cv.getContext('2d');x.scale(dpr,dpr);
+  var cs=getComputedStyle(document.documentElement),cols=['--d1','--d2','--d3','--d4','--gold','--accent'].map(function(v){return cs.getPropertyValue(v).trim();});
+  var P=[];for(var k=0;k<120;k++)P.push({x:W/2,y:H*.42,vx:(Math.random()-.5)*11,vy:-Math.random()*13-4,r:Math.random()*6+4,a:Math.random()*6,va:(Math.random()-.5)*.3,c:cols[k%cols.length]});
+  var t0=performance.now();
+  (function f(t){x.clearRect(0,0,W,H);var alive=t-t0<2600;
+    P.forEach(function(p){p.vy+=.32;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore();});
+    if(alive&&cv.isConnected)requestAnimationFrame(f);else x.clearRect(0,0,W,H);})(t0);
+}
+
+/* ---------- Visionneuse ---------- */
+function openViewer(id){
+  var list=STEPS.filter(function(s){return S.photo[s.id];}),k=list.findIndex(function(s){return s.id===id;});if(k<0)return;
+  var v=document.createElement('div');v.className='viewer';v.setAttribute('role','dialog');v.setAttribute('aria-modal','true');
+  function draw(){var s=list[k];
+    v.innerHTML='<div class="vt"><span style="font-weight:700;font-size:.9rem;opacity:.8">'+(k+1)+' / '+list.length+'</span><button data-v="close" aria-label="Fermer">'+ic('x')+'</button></div>'+
+      '<div class="stage"><img data-photo="'+s.id+'" alt="'+esc(s.place)+'"></div>'+
+      '<div class="vb"><div><b>'+esc(s.place)+'</b><br><span>'+esc(s.when)+' · appui long pour l\'enregistrer</span></div><div class="acts">'+
+      '<button data-v="prev" aria-label="Photo précédente"'+(k===0?' disabled style="opacity:.3"':'')+'>'+ic('left')+'</button>'+
+      '<button data-v="share">'+ic('share')+'Partager</button>'+
+      '<button data-v="next" aria-label="Photo suivante"'+(k===list.length-1?' disabled style="opacity:.3"':'')+'>'+ic('right')+'</button></div></div>';
+    hydrate(v);}
+  v.addEventListener('click',function(e){var b=e.target.closest('[data-v]');if(!b)return;var a=b.getAttribute('data-v');
+    if(a==='close')v.remove();else if(a==='prev'&&k>0){k--;draw();}else if(a==='next'&&k<list.length-1){k++;draw();}else if(a==='share')shareFiles([list[k]]);});
+  var sx=null;v.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+  v.addEventListener('touchend',function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(dx<-50&&k<list.length-1){k++;draw();}else if(dx>50&&k>0){k--;draw();}});
+  draw();$('layer').appendChild(v);
+}
+
+/* ---------- Partage ---------- */
+function shareAll(){shareFiles(STEPS.filter(function(s){return S.photo[s.id];}));}
+function shareFiles(list){
+  Promise.all(list.map(function(s){return getPhoto(s.id).then(function(b){
+    var n=STEPS.indexOf(s)+1;return b?new File([b],String(n).padStart(2,'0')+'-'+s.id+'.jpg',{type:'image/jpeg'}):null;});}))
   .then(function(files){files=files.filter(Boolean);
-    if(navigator.canShare&&navigator.canShare({files:files})){return navigator.share({files:files,title:'Boucle du Nord'});}
-    msg.textContent="Ce téléphone ne permet pas de partager plusieurs photos d'un coup : touche chaque photo, puis appuie longuement pour l'enregistrer.";})
-  .catch(function(e){if(e&&e.name==='AbortError')return;msg.textContent="Le partage n'a pas abouti. Touche chaque photo, puis appuie longuement pour l'enregistrer.";});
+    if(navigator.canShare&&navigator.canShare({files:files}))return navigator.share({files:files,title:'Boucle du Nord'});
+    toast("Partage indisponible ici : ouvre la photo et appuie longuement dessus");})
+  .catch(function(e){if(!e||e.name!=='AbortError')toast("Le partage n'a pas abouti");});
 }
-function view(u){$('viewerImg').src=u;$('viewer').hidden=false;}
-$('closeViewer').addEventListener('click',function(){$('viewer').hidden=true;});
-$('viewer').addEventListener('click',function(e){if(e.target===this)this.hidden=true;});
 
-$('tab-hunt').addEventListener('click',function(){this.setAttribute('aria-pressed','true');$('tab-album').setAttribute('aria-pressed','false');$('hunt').hidden=false;$('albumView').hidden=true;renderSteps();});
-$('tab-album').addEventListener('click',function(){this.setAttribute('aria-pressed','true');$('tab-hunt').setAttribute('aria-pressed','false');$('hunt').hidden=true;$('albumView').hidden=false;renderAlbum();window.scrollTo(0,0);});
+/* ---------- Accueil et installation ---------- */
+function welcome(){
+  var w=document.createElement('div');w.className='welcome';
+  w.innerHTML='<span class="k">Boucle du Nord · 15 → 18 octobre</span><h1>La chasse<em>d\'Ugo</em></h1>'+
+    '<p style="font-size:1.05rem">16 étapes, 4 jours de scooter, et une énigme à chaque arrêt.</p>'+
+    '<ul class="rules"><li><span class="ri">'+ic('bulb')+'</span>Lis l\'énigme et devine où on va</li>'+
+    '<li><span class="ri">'+ic('eye')+'</span>Maintiens le bouton pour révéler le lieu</li>'+
+    '<li><span class="ri">'+ic('cam')+'</span>Relève le défi avec une photo de nous deux</li>'+
+    '<li><span class="ri">'+ic('star')+'</span>Gagne jusqu\'à 20 points par étape</li></ul>'+
+    '<p class="sign" style="color:var(--accent);font-size:1.1rem">Lison</p>'+
+    '<button class="primary" data-start>'+ic('compass')+'<span>C\'est parti</span></button>';
+  document.body.appendChild(w);
+  w.querySelector('[data-start]').addEventListener('click',function(){S.started=true;save();w.remove();installSheet();});
+}
+function installSheet(){
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  if(standalone||S.installSeen)return;
+  var d=document.createElement('div');d.className='sheet';d.setAttribute('role','dialog');
+  d.innerHTML='<b>À faire une fois, avec du réseau</b><p>Dans Safari : bouton Partager, puis « Sur l\'écran d\'accueil ». Ouvre ensuite la chasse toujours depuis l\'icône : elle marche sans connexion et garde les photos.</p><button>Compris</button>';
+  $('layer').appendChild(d);
+  d.querySelector('button').addEventListener('click',function(){S.installSeen=true;save();d.remove();});
+}
 
-var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
-if(!standalone)$('install').hidden=false;
-if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){});}
-if(currentIndex()<0)showAlbum();else renderSteps();
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});
+render();
+if(!S.started)welcome();else installSheet();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 </script>
 </body>
 </html>
