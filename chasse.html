@@ -350,6 +350,12 @@ var STEPS=[
   place:'Lo zaino',about:"Domani si parte alle 9:15 da Chiang Rai. Lo zaino viaggia sullo scooter: solo l'indispensabile.",
   check:['Passaporto','Patente (e permesso internazionale)','Contanti in tagli piccoli: 20 e 100 ฿','Una felpa: a Mae Salong la sera fa freddo','Pantaloni lunghi o un pareo per i templi','Giacca antipioggia','Pantaloncini e un asciugamano piccolo per le sorgenti','Crema solare e occhiali da sole','Antizanzare','Power bank e cavo','La mappa di Chiang Rai scaricata offline su Google Maps','Il buonumore (questo è obbligatorio)'],
   mission:'Tu che fai lo zaino con il casco già in testa.',tip:'Niente casco a portata di mano? Va bene anche un\'insalatiera.'},
+ {id:'scooter',i1:'Prima di qualsiasi cascata, tempio o caffè ci serve una cosa sola: le ruote. Il posto lo conosci tu, Lison si fida ciecamente. Missione numero uno di domani mattina:',rv:'NOLEGGIARE LO SCOOTER!',i2:'Da fare prima di tutto il resto.',ride:'Prima della partenza delle 9:15 · il noleggio lo conosci tu',open:'Domani mattina, per prima cosa',
+  day:1,when:'Giovedì 15 · prima delle 9:15',km:0,
+  quiz:[{q:'In discesa, sulle strade di montagna, come si frena con lo scooter?',o:['Solo con il freno davanti','Freno dietro e freno motore','In folle, si scende più veloci','Con i piedi, come Fred Flintstone'],a:1,f:'Le discese verso Mae Salong sono lunghe: usare solo il freno davanti è il modo migliore per scaldarlo troppo.'}],
+  place:'Lo scooter',about:'Il nostro mezzo per 400 km. Due minuti di controlli prima di firmare evitano discussioni alla riconsegna.',
+  check:['Due caschi che si allacciano bene','Foto dello scooter da tutti i lati prima di partire (graffi già presenti)','Freni provati','Luci e clacson che funzionano','Pieno fatto, o dove si trova il primo distributore','Il numero del noleggio salvato nel telefono','Patente e passaporto a portata di mano'],
+  mission:'Tu in sella con il casco allacciato, Lison dietro con il pollice alzato.',tip:'Prima foto ufficiale del giro.'},
  {id:'lalitta',i1:'Si parte a stomaco vuoto, ma non per molto. Prima tappa: ci abbuffiamo di colazione e beviamo un buon caffè in mezzo alle cascate al…',rv:'LALITTA CAFÉ!',i2:'Prima di sederti, una domanda.',ride:'15 min · 7 km da Chiang Rai (partenza 9:15)',open:'Aperto 8:00–20:00',
   day:1,when:'Giovedì 15 · 9:30',km:7,x:250,y:560,lx:-30,ly:7,anc:'end',short:'Lalitta Café',
   quiz:[{q:"Al Lalitta Café, in cosa si trasforma il biglietto d'ingresso da 60 ฿?",o:['In un dolce','In una bevanda','In una cartolina',"In un'offerta al tempio"],a:1,f:'Il giardino è ispirato alla foresta mitica di Himmapan.'}],
@@ -579,9 +585,11 @@ function mapSvg(){
   h+='<text x="24" y="646" font-size="14" font-weight="700" letter-spacing="2">10 km</text><path d="M24 654h95" stroke="var(--muted)" stroke-width="2"/>';
   h+='<g transform="translate(60 130)"><circle r="22" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="3 4"/><path d="M0 -16 L6 0 L0 16 L-6 0z" fill="var(--accent)"/><text y="-28" text-anchor="middle" font-size="12" font-weight="800">N</text></g>';
   /* strada scoperta */
-  var lastI=cur<0?STEPS.length-1:cur;
-  for(var i=2;i<=lastI;i++){var a=STEPS[i-1],b=STEPS[i],ahead=(i===lastI&&cur>=0);
-    h+='<path d="M'+a.x+' '+a.y+' L'+b.x+' '+b.y+'" stroke="'+DAYCOLOR[b.day]+'" stroke-width="'+(ahead?3:6)+'" stroke-linecap="round" fill="none"'+(ahead?' stroke-dasharray="1 9"':'')+' filter="url(#rough)"/>';}
+  var lastI=cur<0?STEPS.length-1:cur,prev=null;
+  for(var i=0;i<=lastI;i++){var b=STEPS[i];if(!b.x)continue;
+    if(prev){var ahead=(i===lastI&&cur>=0);
+      h+='<path d="M'+prev.x+' '+prev.y+' L'+b.x+' '+b.y+'" stroke="'+DAYCOLOR[b.day]+'" stroke-width="'+(ahead?3:6)+'" stroke-linecap="round" fill="none"'+(ahead?' stroke-dasharray="1 9"':'')+' filter="url(#rough)"/>';}
+    prev=b;}
   var labels='',moto='';
   STEPS.forEach(function(s,i){
     if(!s.x)return;
@@ -604,7 +612,7 @@ function mapSvg(){
     h+='</g>';
     if(done||s.id==='retour')labels+='<text class="lab" x="'+(s.x+s.lx)+'" y="'+(s.y+s.ly)+'" text-anchor="'+s.anc+'">'+esc(s.short)+'</text>';
   });
-  if(cur===0){var cr=STEPS[STEPS.length-1];moto='<g class="bob" aria-hidden="true"><g transform="translate('+(cr.x+8)+' '+(cr.y-58)+')"><circle cx="18" cy="18" r="20" fill="var(--ink)"/><g transform="translate(6 6)" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC.scooter+'</g></g></g>';}
+  if(cur>=0&&!STEPS[cur].x){var cr=STEPS[STEPS.length-1];moto='<g class="bob" aria-hidden="true"><g transform="translate('+(cr.x+8)+' '+(cr.y-58)+')"><circle cx="18" cy="18" r="20" fill="var(--ink)"/><g transform="translate(6 6)" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC.scooter+'</g></g></g>';}
   return h+labels+moto+'</svg>';
 }
 
@@ -639,7 +647,7 @@ function voucher(){
 function mapView(){
   var p=points(),k=level(p),next=LEVELS[k+1],got=earned(),km=kmDone(),done=STEPS.filter(function(s){return s.x&&S.done[s.id];}).length;
   var digits=String(km).padStart(3,'0').split('').map(function(d){return '<b>'+d+'</b>';}).join('');
-  var h='<div class="maphead">'+flags(16)+'<h1>La caccia <em>di Ugo</em></h1><p>'+done+' tappe scoperte su 16 · tocca un punto della mappa</p></div>';
+  var h='<div class="maphead">'+flags(16)+'<h1>La caccia <em>di Ugo</em></h1><p>'+done+' luoghi scoperti su '+STEPS.filter(function(s){return s.x;}).length+' · tocca un punto della mappa</p></div>';
   h+='<div class="map">'+mapSvg()+'<div class="legend"><span><i style="background:var(--d1)"></i>Gio</span><span><i style="background:var(--d2)"></i>Ven</span><span><i style="background:var(--d3)"></i>Sab</span><span><i style="background:var(--d4)"></i>Dom</span><span><i style="border:2px dashed var(--muted)"></i>Da scoprire</span></div></div>';
   h+='<section class="sect">'+voucher()+'</section>';
   h+='<section class="sect"><h2>Contachilometri</h2><div class="panel odo"><span class="digits">'+digits+'</span><span class="u"><b>km in scooter</b>su circa '+TOTKM+' km di giro</span></div></section>';
@@ -747,7 +755,7 @@ function renderCta(){
     if(photoCount())h='<button class="primary alt" data-act="shareall">'+ic('share')+'<span>Condividi tutte le foto</span></button>';
   }else if(V.tab==='map'){
     h=cur<0?'<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Apri l\'album</span></button>'
-           :'<button class="primary" data-act="resume">'+ic('scooter')+'<span>'+(cur===0?'Prepara lo zaino':'Vai alla tappa '+cur)+'</span></button>';
+           :'<button class="primary" data-act="resume">'+ic('scooter')+'<span>'+(cur===0?'Prepara lo zaino':cur===1?'Noleggia lo scooter':'Vai alla tappa '+cur)+'</span></button>';
   }else{
     var i=focusIndex();
     if(i<0)h='<button class="primary" data-act="tab" data-tab="album">'+ic('gift')+'<span>Apri l\'album</span></button>';
@@ -891,7 +899,7 @@ var SLIDES=[
    '<div class="route"><div><small>Partenza</small><b>Chiang Rai</b></div><div class="mid">'+ic('scooter')+'≈ 400 km</div><div style="text-align:right"><small>Arrivo</small><b>Chiang Rai</b></div></div>'+
    '<div class="perf"></div><div class="info"><div><span>Partenza</span><b>Gio 15 ott · 9:15</b></div><div><span>Ritorno</span><b>Dom 18 ott · 16:15</b></div>'+
    '<div><span>Viaggiatori</span><b>Ugo e Lison</b></div><div><span>Mezzo</span><b>1 scooter, 2 caschi</b></div>'+
-   '<div><span>Via</span><b>Mae Salong, Mekong, Doi Tung</b></div><div><span>Tappe</span><b>16 + 1 stasera</b></div></div><div class="code"></div></div>';},
+   '<div><span>Via</span><b>Mae Salong, Mekong, Doi Tung</b></div><div><span>Tappe</span><b>17 + 1 stasera</b></div></div><div class="code"></div></div>';},
  function(){return '<span class="k">Come si gioca</span><h1 style="font-size:2.6rem">Le regole<em>del giro</em></h1><ul class="rules">'+
    '<li><span class="ri">'+ic('quiz')+'</span>A ogni tappa, un quiz: rispondi e scopri il luogo</li>'+
    '<li><span class="ri">'+ic('cam')+'</span>Una sfida foto precisa, con noi due dentro</li>'+
