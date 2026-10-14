@@ -143,8 +143,8 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 110px);max-width:560px;margi
 .qlbl svg{width:16px;height:16px}
 .q{font-family:var(--display);font-size:1.4rem;line-height:1.28;font-weight:600}
 .qblock{display:grid;gap:12px}
-.story{font-family:var(--display);font-size:1.22rem;line-height:1.4;color:var(--ink)}
-.story strong{font-weight:700;color:var(--c);letter-spacing:.01em}
+.tale{font-family:var(--display);font-size:1.22rem;line-height:1.4;color:var(--ink)}
+.tale strong{font-weight:700;color:var(--c);letter-spacing:.01em}
 .facts{display:grid;gap:6px;background:var(--surface2);border-radius:16px;padding:10px 12px;font-size:.88rem;font-weight:700;color:var(--muted)}
 .facts span{display:flex;gap:10px;align-items:flex-start;line-height:1.35}
 .facts svg{width:18px;height:18px;color:var(--c);margin-top:1px}
@@ -691,7 +691,7 @@ function huntView(){
   var anim=lastShown!==s.id;lastShown=s.id;
   h+='<section class="card'+(anim?' in':'')+'" style="--c:'+c+'">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span class="when"><span class="dot"></span>'+esc(s.when)+(s.km?' · '+s.km+' km':'')+'</span><span class="num">'+String(i).padStart(2,'0')+'</span></div>';
-  h+='<p class="story">'+esc(s.i1)+' <strong>'+esc(s.rv)+'</strong>'+(s.i2?' '+esc(s.i2):'')+'</p>';
+  h+='<p class="tale">'+esc(s.i1)+' <strong>'+esc(s.rv)+'</strong>'+(s.i2?' '+esc(s.i2):'')+'</p>';
   h+='<div class="facts"><span>'+ic('scooter')+esc(s.ride)+'</span><span>'+ic('clock')+esc(s.open)+'</span></div>';
   h+=quizBlock(s);
   if(!answered(s)){
