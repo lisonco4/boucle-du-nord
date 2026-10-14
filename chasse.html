@@ -143,6 +143,11 @@ main{padding:6px 16px calc(var(--tab) + var(--sb) + 110px);max-width:560px;margi
 .qlbl svg{width:16px;height:16px}
 .q{font-family:var(--display);font-size:1.4rem;line-height:1.28;font-weight:600}
 .qblock{display:grid;gap:12px}
+.story{font-family:var(--display);font-size:1.22rem;line-height:1.4;color:var(--ink)}
+.story strong{font-weight:700;color:var(--c);letter-spacing:.01em}
+.facts{display:grid;gap:6px;background:var(--surface2);border-radius:16px;padding:10px 12px;font-size:.88rem;font-weight:700;color:var(--muted)}
+.facts span{display:flex;gap:10px;align-items:flex-start;line-height:1.35}
+.facts svg{width:18px;height:18px;color:var(--c);margin-top:1px}
 .opts{display:grid;gap:8px}
 .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border-radius:16px;text-align:left;
   background:var(--surface2);border:2px solid transparent;font-weight:700;font-size:1rem;line-height:1.3;transition:transform .12s ease}
@@ -338,82 +343,100 @@ input[type=file]{position:fixed;left:-9999px;width:1px;height:1px;opacity:0}
 /* ---------- Tappe. quiz: domande a scelta multipla (a = indice della risposta giusta, all = tutte giuste).
    km = chilometri in scooter per arrivarci. La tappa 0 si gioca stasera e non è sulla mappa. ---------- */
 var STEPS=[
- {id:'zaino',day:0,when:'Stasera · aperitivo',km:0,
+ {id:'zaino',i1:'Stasera niente aperitivo tranquillo: domani alle 9:15 lo scooter parte, e il pilota deve essere pronto. Prima, due domande per vedere se sei sveglio. Poi si prepara…',rv:'LO ZAINO!',i2:'',ride:'Domani: partenza 9:15 da Chiang Rai',open:'Stasera, prima di dormire',
+  day:0,when:'Stasera · aperitivo',km:0,
   quiz:[{q:'Quanti giorni dura il giro in scooter?',o:['2 giorni','4 giorni','7 giorni','Finché dura la benzina'],a:1,f:'Da giovedì 15 a domenica 18 ottobre: 4 giorni, 3 notti, circa 400 km.'},
         {q:'Perché ami Lison?',o:['Per il suo sorriso','Perché organizza viaggi perfetti','Per le sue lezioni di yoga','Tutte le risposte sono giuste'],all:true,f:'Qualunque risposta era giusta. Lison approva.'}],
   place:'Lo zaino',about:"Domani si parte alle 9:15 da Chiang Rai. Lo zaino viaggia sullo scooter: solo l'indispensabile.",
   check:['Passaporto','Patente (e permesso internazionale)','Contanti in tagli piccoli: 20 e 100 ฿','Una felpa: a Mae Salong la sera fa freddo','Pantaloni lunghi o un pareo per i templi','Giacca antipioggia','Pantaloncini e un asciugamano piccolo per le sorgenti','Crema solare e occhiali da sole','Antizanzare','Power bank e cavo','La mappa di Chiang Rai scaricata offline su Google Maps','Il buonumore (questo è obbligatorio)'],
   mission:'Tu che fai lo zaino con il casco già in testa.',tip:'Niente casco a portata di mano? Va bene anche un\'insalatiera.'},
- {id:'lalitta',day:1,when:'Giovedì 15 · 9:30',km:7,x:250,y:560,lx:-30,ly:7,anc:'end',short:'Lalitta Café',
+ {id:'lalitta',i1:'Si parte a stomaco vuoto, ma non per molto. Prima tappa: ci abbuffiamo di colazione e beviamo un buon caffè in mezzo alle cascate al…',rv:'LALITTA CAFÉ!',i2:'Prima di sederti, una domanda.',ride:'15 min · 7 km da Chiang Rai (partenza 9:15)',open:'Aperto 8:00–20:00',
+  day:1,when:'Giovedì 15 · 9:30',km:7,x:250,y:560,lx:-30,ly:7,anc:'end',short:'Lalitta Café',
   quiz:[{q:"Al Lalitta Café, in cosa si trasforma il biglietto d'ingresso da 60 ฿?",o:['In un dolce','In una bevanda','In una cartolina',"In un'offerta al tempio"],a:1,f:'Il giardino è ispirato alla foresta mitica di Himmapan.'}],
   place:'Lalitta Café',about:"Un caffè-giardino con cascate, ponti di pietra e sculture ovunque. Colazione in mezzo all'acqua.",
   mission:'Voi due su un ponte di pietra, con una cascata dietro.',maps:'https://www.google.com/maps/search/?api=1&query=Lalitta+Caf%C3%A9+Rim+Kok+Chiang+Rai'},
- {id:'patueng',day:1,when:'Giovedì 15 · 11:45',km:30,x:247,y:390,lx:30,ly:7,anc:'start',short:'Pa Tueng',th:'บ่อน้ำพุร้อนป่าตึง',
+ {id:'patueng',i1:'Pancia piena, si risale in sella. Sulla strada verso le montagne la terra comincia a fumare: benvenuto alle sorgenti calde di…',rv:'PA TUENG!',i2:'Togli le scarpe, ma prima rispondi.',ride:'40 min · 30 km di strada piana (partenza 11:00)',open:'Aperto 9:00–18:00 · sosta 45 min',
+  day:1,when:'Giovedì 15 · 11:45',km:30,x:247,y:390,lx:30,ly:7,anc:'start',short:'Pa Tueng',th:'บ่อน้ำพุร้อนป่าตึง',
   quiz:[{q:"Cosa cuoce la gente del posto nell'acqua più calda delle sorgenti di Pa Tueng?",o:['Il riso','Le pannocchie','Le uova','Il tè'],a:2,f:"Il geyser spruzza l'acqua a una decina di metri d'altezza."}],
   place:'Pa Tueng Hot Springs',about:"Un geyser in un piccolo parco e vasche gratuite dove si immergono i piedi. Un po' di odore di zolfo.",
   mission:'Un selfie con il geyser che esplode dietro di voi.',tip:'Aspettate il getto più alto: scatta al momento giusto.',maps:'https://www.google.com/maps/search/?api=1&query=Pa+Tueng+Hot+Springs&query_place_id=ChIJG_i8gDr81jAROG8mZbGQzWU'},
- {id:'xinshidai',day:1,when:'Giovedì 15 · 13:30',km:45,x:90,y:345,lx:0,ly:46,anc:'middle',short:'Xin Shi Dai',
+ {id:'xinshidai',i1:'Un\'ora di strada, di cui 30 minuti di salita ripida, con le piantagioni di tè all\'orizzonte. Ci meritiamo il pranzo nella panetteria più vecchia di Mae Salong:',rv:'XIN SHI DAI!',i2:'',ride:'1 h · 45 km, salita finale (partenza 12:30)',open:'Aperto 8:00–21:00',
+  day:1,when:'Giovedì 15 · 13:30',km:45,x:90,y:345,lx:0,ly:46,anc:'middle',short:'Xin Shi Dai',
   quiz:[{q:'Da quanto tempo esiste la panetteria Xin Shi Dai di Mae Salong?',o:['Da più di 50 anni','Da 5 anni','Da 150 anni',"Dall'anno scorso"],a:0,f:'Tutto è fatto in casa con burro vero.'}],
   place:'Xin Shi Dai Bakery',about:'Panetteria di famiglia a Mae Salong. Pizza dello Yunnan, tempura, onion rings, e il rotolo alla vaniglia.',
   mission:'Lison che ti imbocca il primo pezzo di rotolo alla vaniglia.',maps:'https://www.google.com/maps/search/?api=1&query=Xin+Shi+Dai+Bakery&query_place_id=ChIJS9MTd03h1jARpEt43s_AlXI'},
- {id:'maesalong',day:1,when:'Giovedì 15 · 15:30',km:2,x:140,y:318,lx:30,ly:7,anc:'start',short:'Mae Salong',th:'แม่สลอง',
+ {id:'maesalong',i1:'Zaini in camera a Twins Farm (check-in 14:45), e via in un villaggio che sembra la Cina, non la Thailandia. Benvenuto a…',rv:'MAE SALONG, il villaggio del tè!',i2:'Ma chi l\'ha costruito?',ride:'Pochi minuti tra un punto e l\'altro: si parcheggia e si cammina',open:'Museo aperto 8:00–17:00',
+  day:1,when:'Giovedì 15 · 15:30',km:2,x:140,y:318,lx:30,ly:7,anc:'start',short:'Mae Salong',th:'แม่สลอง',
   quiz:[{q:'Chi ha fondato il villaggio di Mae Salong dopo il 1949?',o:['Monaci tibetani','Mercanti inglesi','Soldati cinesi nazionalisti','Pescatori del Mekong'],a:2,f:"I loro figli hanno sostituito l'oppio con il tè oolong."}],
   place:'Il villaggio di Mae Salong',about:'Il museo dei Martiri cinesi, la tomba del generale Tuan e la via delle case del tè, dove la degustazione è gratis.',
   mission:'Un brindisi con due tazzine di oolong, mignolo alzato.',maps:'https://www.google.com/maps/search/?api=1&query=Chinese+Martyrs+Memorial+Museum+Mae+Salong'},
- {id:'sunset1',day:1,when:'Giovedì 15 · 17:15',km:2,x:50,y:312,lx:0,ly:-30,anc:'middle',short:'Tramonto',
+ {id:'sunset1',i1:'Il sole scende sui filari e le colline diventano d\'oro. Primo tramonto del viaggio, e si sceglie: terrazza panoramica o balcone con le lucciole.',rv:'TRAMONTO SUL TÈ!',i2:'Domanda per romantici:',ride:'Pochi minuti dal villaggio',open:'Flower Hills aperto fino alle 21:00 · tramonto 17:50',
+  day:1,when:'Giovedì 15 · 17:15',km:2,x:50,y:312,lx:0,ly:-30,anc:'middle',short:'Tramonto',
   quiz:[{q:'A che ora tramonta il sole sulle piantagioni di Mae Salong a metà ottobre?',o:['Verso le 16:15','Verso le 17:50','Verso le 19:30','Verso le 20:45'],a:1,f:'Al buio, spegnete la luce del balcone: si vedono le lucciole.'}],
   place:'Tramonto sulle piantagioni',about:'Dalla terrazza di Mae Salong Flower Hills, oppure dal balcone di Twins Farm.',
   mission:'Le vostre mani che formano un cuore, con il sole dentro.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Flower+Hills&query_place_id=ChIJL89Xcwjk1jARzrydZQFGhag'},
- {id:'marche',day:2,when:'Venerdì 16 · 7:00',km:2,x:100,y:262,lx:0,ly:-30,anc:'middle',short:'Mercato',
+ {id:'marche',i1:'Sveglia all\'alba, sì, davvero. Alle 7 i villaggi Akha scendono dalle montagne con erbe, funghi e tè per…',rv:'IL MERCATO DEL MATTINO!',i2:'Si fa colazione in piedi, come la gente del posto.',ride:'Pochi minuti dall\'hotel · strada da controllare la sera prima',open:'Dalle 6:00 · il meglio prima delle 8:00',
+  day:2,when:'Venerdì 16 · 7:00',km:2,x:100,y:262,lx:0,ly:-30,anc:'middle',short:'Mercato',
   quiz:[{q:'Qual è la colazione tipica al mercato del mattino di Mae Salong?',o:['Cappuccino e cornetto','Latte di soia caldo e frittelle cinesi','Riso al mango','Pho vietnamita'],a:1,f:'Il grosso del mercato succede prima delle 8.'}],
   place:'Il mercato del mattino',about:'Gli Akha scendono dalle montagne con erbe, funghi e tè. Dite « jay » per la versione senza carne.',
   mission:'Tu con una frittella cinese al posto dei baffi.',maps:'https://www.google.com/maps/search/?api=1&query=5J8G%2BC97+Mae+Salong+Nok'},
- {id:'triangle',day:2,when:'Venerdì 16 · 15:35',km:83,x:516,y:128,lx:0,ly:-30,anc:'middle',short:"Triangolo d'Oro",th:'สามเหลี่ยมทองคำ',
+ {id:'triangle',i1:'Lunga discesa, pranzo veloce a Mae Chan, check-in sul Mekong e il tuo appuntamento online delle 14. Poi 5 minuti di scooter e sei nel punto più famoso della regione:',rv:'IL TRIANGOLO D\'ORO!',i2:'',ride:'1 h 45 di strada in tutto da Mae Salong (partenza 10:45), poi 5 min · 3 km dall\'hotel',open:'Gratis · sosta 15 min',
+  day:2,when:'Venerdì 16 · 15:35',km:83,x:516,y:128,lx:0,ly:-30,anc:'middle',short:"Triangolo d'Oro",th:'สามเหลี่ยมทองคำ',
   quiz:[{q:"Quali paesi si guardano al Triangolo d'Oro?",o:['Thailandia, Cambogia, Vietnam','Thailandia, Laos, Cina','Thailandia, Laos, Myanmar','Thailandia, Myanmar, India'],a:2,f:'Il fiume Ruak si getta nel Mekong proprio qui, a Sop Ruak.'}],
   place:"Il Triangolo d'Oro",about:"Tre paesi uno di fronte all'altro, sotto un grande Buddha dorato in riva all'acqua. Restate a terra: le barche fanno tappa in Laos.",
   mission:'Tu che indichi il Laos, Lison che indica il Myanmar, e voi due in Thailandia.',maps:'https://www.google.com/maps/search/?api=1&query=Golden+Triangle+Park+Sop+Ruak'},
- {id:'chiangsaen',day:2,when:'Venerdì 16 · 16:10',km:9,x:517,y:240,lx:30,ly:7,anc:'start',short:'Chiang Saen',th:'เชียงแสน',
+ {id:'chiangsaen',i1:'Mille anni fa qui c\'era una capitale. Oggi restano templi di mattoni mangiati dagli alberi, e quasi nessun turista. Benvenuto nell\'antica città di…',rv:'CHIANG SAEN!',i2:'',ride:'15 min · 9 km dal Triangolo d\'Oro (partenza 15:55)',open:'Wat Pa Sak chiude alle 17:00 · 50–100 ฿',
+  day:2,when:'Venerdì 16 · 16:10',km:9,x:517,y:240,lx:30,ly:7,anc:'start',short:'Chiang Saen',th:'เชียงแสน',
   quiz:[{q:'Il tempio Wat Pa Sak di Chiang Saen si trova in mezzo a una foresta di…',o:['Bambù','Teak','Pini','Banani'],a:1,f:'Chiang Saen è stata una capitale del regno Lanna. Wat Pa Sak chiude alle 17.'}],
   place:'Wat Pa Sak, Chiang Saen',about:'Templi in mattoni avvolti dagli alberi. Sulla collina, il chedi di Wat Phra That Chom Kitti pende un po\'. Spalle e ginocchia coperte.',
   mission:'Voi due che « reggete » il chedi pendente di Chom Kitti, come alla torre di Pisa.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Pa+Sak+Chiang+Saen'},
- {id:'mekong',day:2,when:'Venerdì 16 · 17:25',km:6,x:556,y:178,lx:-4,ly:46,anc:'middle',short:'Mekong',th:'แม่น้ำโขง',
+ {id:'mekong',i1:'Fine giornata in riva al fiume più leggendario del Sud-est asiatico. Una birra o un tè, i piedi sul bordo, e lo spettacolo del tramonto sul…',rv:'MEKONG!',i2:'',ride:'10 min · 6 km lungo il fiume (partenza 17:15)',open:'Tramonto verso le 17:50 · ora blu verso le 18:15',
+  day:2,when:'Venerdì 16 · 17:25',km:6,x:556,y:178,lx:-4,ly:46,anc:'middle',short:'Mekong',th:'แม่น้ำโขง',
   quiz:[{q:"Davanti all'hotel, sull'altra riva del Mekong, quale paese c'è?",o:['Il Myanmar','La Cina','Il Laos','La Cambogia'],a:2,f:'Il sole tramonta alle vostre spalle, ma il cielo diventa rosa sopra il Laos.'}],
   place:'Tramonto sul Mekong',about:'Dalla riva davanti al View Khong Hotel, o in terrazza al Golden Time accanto.',
   mission:'Lison che fa il saluto al sole davanti al Mekong, e tu che la copi.',maps:'https://www.google.com/maps/search/?api=1&query=View+Khong+Hotel+Chiang+Saen&query_place_id=ChIJRwg_3PFD1jARU9CsnZKqjAY'},
- {id:'opium',day:3,when:'Sabato 17 · 10:00',km:3,x:480,y:172,lx:-30,ly:7,anc:'end',short:'Hall of Opium',th:'หอฝิ่น',
+ {id:'opium',i1:'Mattina da museo, ma non uno qualunque: un tunnel buio, la storia dell\'oppio, e finalmente capirai perché in queste montagne si beve tanto tè. Benvenuto alla…',rv:'HALL OF OPIUM!',i2:'',ride:'5 min · 3 km dall\'hotel (partenza 9:50, check-out prima)',open:'Mar–dom 8:30–16:00 · 200 ฿ · 1 h 45',
+  day:3,when:'Sabato 17 · 10:00',km:3,x:480,y:172,lx:-30,ly:7,anc:'end',short:'Hall of Opium',th:'หอฝิ่น',
   quiz:[{q:'Come si entra nel museo Hall of Opium?',o:['In barca','Da un lungo tunnel buio','Con un ascensore panoramico','Da una grotta con le scimmie'],a:1,f:'Il museo spiega perché il tè e il caffè hanno sostituito il papavero in queste montagne.'}],
   place:'Hall of Opium',about:'Il miglior museo del nord della Thailandia, creato da una fondazione reale. Calcolate 1h45.',
   mission:"Voi due all'ingresso del museo, con la faccia di chi sta per entrare in un tunnel buio.",maps:'https://www.google.com/maps/search/?api=1&query=Hall+of+Opium+Golden+Triangle+Park'},
- {id:'thampla',day:3,when:'Sabato 17 · 13:00',km:48,x:306,y:181,lx:30,ly:7,anc:'start',short:'Tham Pla',th:'วัดถ้ำปลา',
+ {id:'thampla',i1:'Attenzione: la prossima tappa è abitata da una banda di scimmie senza alcuna educazione. Un tempio rosso nella roccia, pesci giganti e una grotta:',rv:'WAT THAM PLA!',i2:'',ride:'50 min · 45 km lungo la frontiera (partenza 12:05)',open:'Aperto 6:00–18:00 · gratis, offerta libera',
+  day:3,when:'Sabato 17 · 13:00',km:48,x:306,y:181,lx:30,ly:7,anc:'start',short:'Tham Pla',th:'วัดถ้ำปลา',
   quiz:[{q:"All'ingresso di Wat Tham Pla, la grotta delle scimmie, cosa conviene prendere?",o:['Delle banane per le scimmie','Un ombrello','Un bastone di bambù','Un casco'],a:2,f:'Si batte il bastone per terra se una scimmia insiste. Niente in mano, borsa chiusa, occhiali in tasca.'}],
   place:'Wat Tham Pla',about:'Un tempio rosso e oro contro la falesia, una sorgente piena di pesci enormi e un santuario in cima alle scale.',
   mission:'Tu con il bastone di bambù in posa da guardiano, e una scimmia nell\'inquadratura.',tip:'A distanza di sicurezza, mi raccomando.',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Tham+Pla&query_place_id=ChIJ1wQUu3v21jARgOnPf1tQVtE'},
- {id:'chouifong',day:3,when:'Sabato 17 · 14:20',km:15,x:263,y:310,lx:30,ly:7,anc:'start',short:'Choui Fong',th:'ไร่ชาฉุยฟง',
+ {id:'chouifong',i1:'Dopo le scimmie, un po\' di pace: 160 ettari di tè a perdita d\'occhio e un caffè con vetrata per un dolce al matcha. Benvenuto a…',rv:'CHOUI FONG!',i2:'',ride:'20 min · 15 km (partenza 14:00)',open:'Aperto 8:30–17:30 · ingresso gratis',
+  day:3,when:'Sabato 17 · 14:20',km:15,x:263,y:310,lx:30,ly:7,anc:'start',short:'Choui Fong',th:'ไร่ชาฉุยฟง',
   quiz:[{q:'In che anno è nata la piantagione di tè Choui Fong?',o:['1890','1955','1977','2005'],a:2,f:'Oggi sono 160 ettari di terrazze a onde sulle colline.'}],
   place:'Choui Fong Tea',about:"Passeggiata libera tra i filari, degustazione al negozio e caffè con vetrata sulle piantagioni. Famoso l'oolong all'osmanto.",
   mission:'Voi due nascosti tra i filari: solo le teste che spuntano dal tè.',maps:'https://www.google.com/maps/search/?api=1&query=Choui+Fong+Tea+Plantation&query_place_id=ChIJg_wdGB_51jARo1fdwwocqUg'},
- {id:'maesalongnai',day:3,when:'Sabato 17 · 17:15',km:22,x:195,y:258,lx:0,ly:-30,anc:'middle',short:'Mae Salong Nai',
+ {id:'maesalongnai',i1:'Check-in alla villa, poi l\'ultima salita della giornata: 18 km di curve fino a una cresta dove non sale nessuno. Il tramonto più alto del viaggio ti aspetta al belvedere di…',rv:'MAE SALONG NAI!',i2:'',ride:'30 min · 18 km di salita, strada 1130 (partenza 16:45)',open:'Tramonto 17:50 · ritorno al buio, piano',
+  day:3,when:'Sabato 17 · 17:15',km:22,x:195,y:258,lx:0,ly:-30,anc:'middle',short:'Mae Salong Nai',
   quiz:[{q:'Cosa si vede dal belvedere di Mae Salong Nai?',o:['Il mare','Le montagne da entrambi i lati della cresta',"Il Triangolo d'Oro",'Bangkok in lontananza'],a:1,f:'La sera non sale quasi nessuno: è il tramonto più alto del viaggio.'}],
   place:'Belvedere di Mae Salong Nai',about:'18 km di salita sulla strada 1130. Al ritorno, piano e fanale acceso, con la cena al Cave lungo la strada.',
   mission:'Voi due seduti sullo scooter, il tramonto alle spalle.',maps:'https://www.google.com/maps/search/?api=1&query=Mae+Salong+Nai+Viewpoint&query_place_id=ChIJ06zaqvLl1jARxJ21tzkExdA'},
- {id:'doitung',day:4,when:'Domenica 18 · 10:00',km:53,x:256,y:212,lx:-30,ly:7,anc:'end',short:'Doi Tung',th:'ดอยตุง',
+ {id:'doitung',i1:'Ultimo giorno! Si sale verso una montagna dove una principessa ha trasformato i campi di oppio in giardini fioriti. Benvenuto a…',rv:'DOI TUNG!',i2:'',ride:'45 min · 35 km, statale poi salita (partenza 9:15)',open:'Aperto 8:00–17:00 · 2 h · spalle e ginocchia coperte',
+  day:4,when:'Domenica 18 · 10:00',km:53,x:256,y:212,lx:-30,ly:7,anc:'end',short:'Doi Tung',th:'ดอยตุง',
   quiz:[{q:'Con cosa ha sostituito il papavero la principessa madre a Doi Tung?',o:['Riso e mais','Tabacco','Caffè, macadamia e artigianato','Vigneti'],a:2,f:'La sua villa sembra uno chalet svizzero.'}],
   place:'Doi Tung',about:"La villa reale e i giardini di Mae Fah Luang, tra i più belli del paese, fioriti tutto l'anno. Assaggiate il caffè Doi Tung.",
   mission:'Tu che annusi il fiore più grande del giardino.',maps:'https://www.google.com/maps/search/?api=1&query=Doi+Tung+Royal+Villa&query_place_id=ChIJl4ogPNXw1jARseevfY93IoQ'},
- {id:'bigbuddha',day:4,when:'Domenica 18 · 14:50',km:65,x:306,y:574,lx:30,ly:7,anc:'start',short:'Big Buddha',th:'วัดห้วยปลากั้ง',
+ {id:'bigbuddha',i1:'Sulla via del ritorno, una statua bianca alta come un palazzo di 20 piani ti guarda dalla collina. E si sale in ascensore… dentro la sua testa. Ecco il…',rv:'BIG BUDDHA!',i2:'',ride:'1 h 20 · 65 km via Mae Chan (partenza 13:30)',open:'Ingresso libero · ascensore 40 ฿ fino alle 18:00',
+  day:4,when:'Domenica 18 · 14:50',km:65,x:306,y:574,lx:30,ly:7,anc:'start',short:'Big Buddha',th:'วัดห้วยปลากั้ง',
   quiz:[{q:'Di che colore è la statua gigante di Wat Huay Pla Kang?',o:['Dorata','Bianca','Rossa','Verde giada'],a:1,f:'Tutti la chiamano Big Buddha, ma è Guanyin, dea della misericordia: 69 metri, e un ascensore sale fino alla testa.'}],
   place:'Wat Huay Pla Kang',about:'Ascensore 40 ฿, biglietti fino alle 18. Accanto, una pagoda di nove piani con scale a forma di drago.',
   mission:'Lison che tiene la statua sul palmo della mano (gioco di prospettiva).',maps:'https://www.google.com/maps/search/?api=1&query=Wat+Huay+Pla+Kang&query_place_id=ChIJE7rdqpsG1zAR64zTj5CGWiw'},
- {id:'retour',day:4,when:'Domenica 18 · 16:15',km:8,x:280,y:620,lx:0,ly:46,anc:'middle',short:'Chiang Rai',th:'เชียงราย',
+ {id:'retour',i1:'Ultimi chilometri. Si riconsegna lo scooter, ma la serata non è finita: ultima sera del festival vegetariano, burger e luci in città. Bentornato a…',rv:'CHIANG RAI!',i2:'',ride:'15 min · 8 km (partenza 16:00)',open:'Kunda aperto fino alle 19:30 · solo contanti',
+  day:4,when:'Domenica 18 · 16:15',km:8,x:280,y:620,lx:0,ly:46,anc:'middle',short:'Chiang Rai',th:'เชียงราย',
   quiz:[{q:"Cosa si mangia da Kunda, l'ultima sera a Chiang Rai?",o:['Sushi','Pizza al forno a legna','Burger vegani','Kebab'],a:2,f:'Ultima sera del festival vegetariano. Kunda è aperto fino alle 19:30, solo contanti.'}],
   place:'Ritorno a Chiang Rai',about:'Si riconsegna lo scooter. Il giro è chiuso.',
   mission:"Voi due davanti alla torre dell'orologio d'oro di Chiang Rai.",tip:'La sera la torre si accende con uno spettacolo di luci.',maps:'https://www.google.com/maps/search/?api=1&query=Chiang+Rai+Clock+Tower'}
 ];
 var DAYCOLOR={0:'var(--gold)',1:'var(--d1)',2:'var(--d2)',3:'var(--d3)',4:'var(--d4)'};
 var PTS={answer:3,photo:2,done:5};
-var MAX=STEPS.reduce(function(t,s){return t+s.quiz.length*PTS.answer+PTS.photo+PTS.done;},0);
+var GOAL=STEPS.reduce(function(t,s){return t+s.quiz.length*PTS.answer+PTS.done;},0); /* massaggio: quiz + tappe, foto escluse */
+var MAX=GOAL+STEPS.length*PTS.photo; /* con tutte le foto bonus */
 var TOTKM=STEPS.reduce(function(t,s){return t+s.km;},0);
-var LEVELS=[[0,'Germoglio'],[30,'Foglia giovane'],[65,'Tazza di oolong'],[105,'Teiera fumante'],[145,'Maestro del tè']];
+var LEVELS=[[0,'Germoglio'],[25,'Foglia giovane'],[55,'Tazza di oolong'],[90,'Teiera fumante'],[120,'Maestro del tè']];
 var LETTERS=['A','B','C','D'];
 var IC={
  leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7"/>',
@@ -437,6 +460,7 @@ var IC={
  cave:'<path d="M3 20L9 6l3 5 2-3 7 12zM10 20a2.5 3 0 015 0"/>',
  flower:'<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5a3 3 0 110-6 3 3 0 110 6zM12 14.5a3 3 0 110 6 3 3 0 110-6zM9.5 12a3 3 0 11-6 0 3 3 0 116 0zM14.5 12a3 3 0 116 0 3 3 0 11-6 0z"/>',
  bag:'<path d="M6 8h12l1 12H5zM9 8V6a3 3 0 016 0v2M9 13h6"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  hands:'<path d="M8 20c-2-2-3-4-3-7l1-5a1.5 1.5 0 013 0v4M9 12V5a1.5 1.5 0 013 0v7M12 11V6a1.5 1.5 0 013 0v6M15 11V8a1.5 1.5 0 013 0v5c0 3-1 5-3 7"/>'
 };
 function ic(n,cls){return '<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';}
@@ -468,17 +492,14 @@ function settled(id){return !!(S.done[id]||S.skipped[id]);}
 function currentIndex(){for(var i=0;i<STEPS.length;i++)if(!settled(STEPS[i].id))return i;return -1;}
 function stepPoints(s){return rightCount(s)*PTS.answer+(S.done[s.id]&&S.photo[s.id]?PTS.photo:0)+(S.done[s.id]?PTS.done:0);}
 function points(){return STEPS.reduce(function(p,s){return p+stepPoints(s);},0);}
-function lost(){return STEPS.reduce(function(t,s){
-  var l=0;s.quiz.forEach(function(q,qi){if(qAnswered(s,qi)&&!qRight(s,qi))l+=PTS.answer;});
-  if(S.done[s.id]&&!S.photo[s.id])l+=PTS.photo;
-  if(S.skipped[s.id]&&!S.done[s.id])l+=PTS.photo+PTS.done+s.quiz.filter(function(q,qi){return !qAnswered(s,qi);}).length*PTS.answer;
-  return t+l;},0);}
 function level(p){var k=0;LEVELS.forEach(function(x,i){if(p>=x[0])k=i;});return k;}
 function kmDone(){return STEPS.reduce(function(t,s){return t+(settled(s.id)?s.km:0);},0);}
 function unlocked(i){var s=STEPS[i];return settled(s.id)||i===currentIndex()||!!S.opened[s.id];}
 function focusIndex(){return V.focus===null?currentIndex():V.focus;}
 function photoCount(){return STEPS.filter(function(s){return S.photo[s.id];}).length;}
-function won(){return points()>=MAX;}
+function won(){return points()>=GOAL;}
+/* foglie ancora raccoglibili (foto bonus comprese) */
+function remaining(){return STEPS.reduce(function(t,s){return t+s.quiz.filter(function(q,qi){return !qAnswered(s,qi);}).length*PTS.answer+(S.done[s.id]?0:PTS.done)+(S.photo[s.id]?0:PTS.photo);},0);}
 
 /* ---------- Timbri del passaporto ---------- */
 function dayDone(d){return STEPS.every(function(s){return s.day!==d||S.done[s.id];});}
@@ -526,7 +547,7 @@ function compress(file){return loadImage(file).then(function(img){
 /* ---------- Disegni ---------- */
 var cupN=0;
 function cupSvg(p,cls){
-  var fill=Math.max(0,Math.min(1,p/MAX)),y=(86-50*fill).toFixed(1),id='cupc'+(cupN++);
+  var fill=Math.max(0,Math.min(1,p/GOAL)),y=(86-50*fill).toFixed(1),id='cupc'+(cupN++);
   return '<svg class="'+(cls||'')+'" viewBox="0 0 120 110" aria-hidden="true">'+
    '<defs><clipPath id="'+id+'"><path d="M18 34h70v24a35 28 0 01-70 0z"/></clipPath></defs>'+
    '<g class="steam" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" opacity="'+(fill>0?1:0)+'">'+
@@ -607,12 +628,12 @@ function renderTabs(){
 function renderMain(){var m=$('main');if(V.tab!=='hunt')lastShown=null;m.innerHTML=V.tab==='map'?mapView():V.tab==='album'?albumView():huntView();fresh1=null;hydrate(m);}
 
 function voucher(){
-  var p=points(),l=lost(),w=won();
+  var p=points(),w=won(),reach=p+remaining();
   var h='<div class="voucher'+(w?' won':'')+'"><span class="k">Il premio di Lison</span><div class="row"><span class="gift">'+ic('gift')+'</span><h3>Un massaggio thai completo</h3></div>';
   if(w)h+='<p>Sbloccato! Da riscattare presso Lison, quando vuoi.</p>';
-  else{h+='<p>Si sblocca con la tazza piena: tutte le '+MAX+' foglie. Ogni risposta conta.</p>'+
-     '<div class="meter"><i style="width:'+Math.round(p/MAX*100)+'%"></i></div><p>'+p+' / '+MAX+' foglie'+
-     (l>0?' · '+l+' perse per strada. Forse Lison sarà clemente…':'')+'</p>';}
+  else{h+='<p>Si sblocca con la tazza piena: '+GOAL+' foglie. Le foto danno foglie bonus, utili per recuperare una risposta sbagliata.</p>'+
+     '<div class="meter"><i style="width:'+Math.min(100,Math.round(p/GOAL*100))+'%"></i></div><p>'+p+' / '+GOAL+' foglie'+
+     (reach<GOAL?' · ormai è dura… forse Lison sarà clemente.':'')+'</p>';}
   return h+'</div>';
 }
 function mapView(){
@@ -623,9 +644,9 @@ function mapView(){
   h+='<section class="sect">'+voucher()+'</section>';
   h+='<section class="sect"><h2>Contachilometri</h2><div class="panel odo"><span class="digits">'+digits+'</span><span class="u"><b>km in scooter</b>su circa '+TOTKM+' km di giro</span></div></section>';
   h+='<section class="sect"><h2>La tua tazza di tè</h2><div class="panel cupbox">'+cupSvg(p)+'<div><div class="lvl">'+LEVELS[k][1]+'</div>'+
-     '<div class="sub">'+p+' foglie di tè su '+MAX+(next?' · ancora '+(next[0]-p)+' per « '+next[1]+' »':'')+'</div>'+
-     '<div class="meter"><i style="width:'+Math.round(p/MAX*100)+'%"></i></div></div></div>'+
-     '<p class="howpts">Risposta giusta +3 · foto +2 · tappa convalidata +5</p></section>';
+     '<div class="sub">'+p+' foglie · tazza piena a '+GOAL+(next?' · ancora '+(next[0]-p)+' per « '+next[1]+' »':'')+'</div>'+
+     '<div class="meter"><i style="width:'+Math.min(100,Math.round(p/GOAL*100))+'%"></i></div></div></div>'+
+     '<p class="howpts">Risposta giusta +3 · tappa convalidata +5 · ogni foto: bonus +2</p></section>';
   h+='<section class="sect"><h2>Timbri del passaporto <small>'+got.length+' / '+STAMPS.length+'</small></h2><div class="stamps">';
   STAMPS.forEach(function(b){var on=got.indexOf(b.id)>=0;
     h+='<div class="stamp'+(on?' on':'')+'" style="--c:'+b.c+'"><span class="s">'+ic(b.icon)+'</span><span>'+esc(on?b.name:b.how)+'</span></div>';});
@@ -670,9 +691,11 @@ function huntView(){
   var anim=lastShown!==s.id;lastShown=s.id;
   h+='<section class="card'+(anim?' in':'')+'" style="--c:'+c+'">';
   h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><span class="when"><span class="dot"></span>'+esc(s.when)+(s.km?' · '+s.km+' km':'')+'</span><span class="num">'+String(i).padStart(2,'0')+'</span></div>';
+  h+='<p class="story">'+esc(s.i1)+' <strong>'+esc(s.rv)+'</strong>'+(s.i2?' '+esc(s.i2):'')+'</p>';
+  h+='<div class="facts"><span>'+ic('scooter')+esc(s.ride)+'</span><span>'+ic('clock')+esc(s.open)+'</span></div>';
   h+=quizBlock(s);
   if(!answered(s)){
-    h+='<div class="mystery"><span class="qm">?</span>'+(s.check?'Rispondi per scoprire la sfida di stasera':'Rispondi per scoprire il luogo e la sfida foto')+'</div>';
+    h+='<div class="mystery"><span class="qm">?</span>'+(s.check?'Rispondi per scoprire la sfida di stasera':'Rispondi per scoprire i dettagli e la sfida foto')+'</div>';
   }else{
     h+='<div class="place'+(fresh1&&fresh1.indexOf(s.id+':')===0?' in':'')+'"><span class="lbl">'+(s.check?'La sfida di stasera':'Il luogo')+'</span><h2>'+esc(s.place)+'</h2>'+(s.th?'<span class="th">'+s.th+'</span>':'')+'<p>'+esc(s.about)+'</p></div>';
     if(s.maps)h+='<div><a class="chipbtn" href="'+esc(s.maps)+'" target="_blank" rel="noopener">'+ic('pin')+'Apri in Maps</a></div>';
@@ -682,7 +705,7 @@ function huntView(){
         h+='<label class="ck"><input type="checkbox" id="ck-'+k+'" data-ck="'+id+'"'+(S.check[id]?' checked':'')+'><span class="box">'+ic('check')+'</span><span>'+esc(t)+'</span></label>';});
       h+='</div>';
     }
-    h+='<div class="mission"><span class="lbl">'+ic('cam')+'Sfida foto · +2 foglie</span><p>'+esc(s.mission)+'</p>'+(s.tip?'<small>'+esc(s.tip)+'</small>':'');
+    h+='<div class="mission"><span class="lbl">'+ic('cam')+'Sfida foto · bonus +2 foglie</span><p>'+esc(s.mission)+'</p>'+(s.tip?'<small>'+esc(s.tip)+'</small>':'');
     if(S.photo[s.id])h+='<div class="pic"><img data-photo="'+s.id+'" alt="La vostra foto: '+esc(s.place)+'" data-act="view" data-id="'+s.id+'"><button data-act="photo">'+ic('swap')+'Cambia</button></div>';
     else h+='<button class="shot" data-act="photo">'+ic('cam')+'<span>Scatta o scegli la foto<small>Fotocamera o galleria</small></span></button>';
     if(V.saving===s.id)h+='<p class="saving">Salvataggio della foto…</p>';
@@ -703,9 +726,9 @@ function finaleView(){
   var w=won(),p=points();
   return '<section class="treasure">'+flags(12)+'<span class="when" style="justify-content:center">Giro completato · '+kmDone()+' km</span><h2>Tesoro trovato</h2>'+
     '<div style="display:grid;place-items:center">'+(w?giftSvg('giftbig'):cupSvg(p,'cup'))+'</div>'+
-    '<p><b>'+p+' foglie di tè</b> su '+MAX+' · '+LEVELS[level(p)][1]+' · '+earned().length+' timbri su '+STAMPS.length+'</p>'+
+    '<p><b>'+p+' foglie di tè</b> (tazza piena a '+GOAL+') · '+LEVELS[level(p)][1]+' · '+earned().length+' timbri su '+STAMPS.length+'</p>'+
     (w?'<p class="q" style="font-size:1.3rem">Tazza piena: hai vinto un massaggio thai completo, fatto da Lison.</p>'
-      :'<p>Per il massaggio thai mancano '+(MAX-p)+' foglie. Ma Lison potrebbe essere clemente…</p>')+
+      :'<p>Per il massaggio thai mancano '+(GOAL-p)+' foglie. Ma Lison potrebbe essere clemente…</p>')+
     '<p>E il resto del tesoro è questo album: 4 giorni, 400 km, e noi due in ogni foto.</p><p class="sign">Lison</p></section>'+
     '<section class="sect">'+voucher()+'</section>';
 }
@@ -875,7 +898,7 @@ var SLIDES=[
    '<li><span class="ri g">'+ic('leaf')+'</span>Raccogli foglie di tè e riempi la tazza</li>'+
    '<li><span class="ri">'+ic('map')+'</span>La mappa si svela tappa dopo tappa</li></ul>';},
  function(){return '<span class="k">Il premio</span>'+giftSvg('giftbig')+'<h1 style="font-size:2.5rem">Un massaggio thai<em>completo</em></h1>'+
-   '<p class="big">Fatto da Lison. Ma solo con la tazza piena: tutte le '+MAX+' foglie. Ogni risposta conta, ogni foto conta.</p>';},
+   '<p class="big">Fatto da Lison. Ma solo con la tazza piena: '+GOAL+' foglie. Ogni risposta conta, e le foto danno foglie bonus per recuperare un errore.</p>';},
  function(){return '<span class="k">Tappa 0 · stasera</span><h1>Prima<em>sfida</em></h1><p class="big">Due domande, una lista da spuntare e una foto. Domani alle 9:15 lo scooter non aspetta.</p>'+flags(14);}
 ];
 function intro(){
@@ -904,6 +927,8 @@ function installSheet(){
   d.querySelector('button').addEventListener('click',function(){S.installSeen=true;save();d.remove();});
 }
 
+/* chasse.html?nuovo : riparte da zero su questo telefono */
+if(/[?&]nuovo/.test(location.search)){S=fresh();save();clearPhotos();try{history.replaceState(null,'',location.pathname);}catch(e){}}
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});
 render();
 if(!S.started)intro();else installSheet();
